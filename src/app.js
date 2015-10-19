@@ -143,9 +143,9 @@
 					} catch (err) {}
 
 					try {
-						_this.attrs.desc = restoredData.desc;
-						_this.attrs.setup = restoredData.setup || {code: ''};
-						_this.attrs.teardown = restoredData.teardown || {code: ''};
+						attrs.desc = restoredData.desc;
+						attrs.setup = restoredData.setup || {code: ''};
+						attrs.teardown = restoredData.teardown || {code: ''};
 						_this.snippets = restoredData.snippets.map(function (code) {
 							return newSnippet(code);
 						});
@@ -323,7 +323,7 @@
 				(!attrs.setup.enabled ? '' : [
 				'	Benchmark.prototype.setup = function () {',
 				'		' + attrs.setup.code.trim().split('\n').join('\n\t\t'),
-				'	};// end',
+				'	};',
 				''
 				].join('\n')),
 
@@ -394,9 +394,9 @@
 						var isNew = !gist.id;
 
 						return github.gist.save(gist.id, desc + (isNew ? ' ' : ' (' + location.toString() + ') ')  + GIST_TAGS, files).then(function (gist) {
-							location.hash = gist.id;
+							_this.set('gist', gist); // (1)
+							location.hash = gist.id; // (2)
 
-							_this.set('gist', gist);
 							swal('Saved', gist.html_url, 'success');
 
 							if (isNew) {
@@ -404,7 +404,7 @@
 								_this.addStat(_this._lastAddedStats);
 							}
 
-							return gist
+							return gist;
 						});
 					};
 
@@ -426,7 +426,6 @@
 		},
 
 		handleConfigure: function (evt) {
-			debugger;
 			evt.details.visible = !evt.details.visible;
 			this.render();
 		},

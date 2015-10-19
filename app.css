@@ -136,13 +136,34 @@ a { color: #46b8da }
 		text-align: center;
 		font-size: 300px;
 		line-height: 0;
-		padding-bottom: 50px;
 		-webkit-animation: up-down 1.5s ease-out 0s infinite;
 		animation: up-down 1.5s ease-out 0s infinite;
 		opacity: .7;
+		-webkit-user-select: none;
+		user-select: none;
+		background: rgba(0, 0, 0, .6);
+		box-shadow: 0 0 5px rgba(0, 0, 0, .6);
+		border-radius: 100%;
+		width: 120px;
+		height: 120px;
+		color: #fff;
 	}
+		.app__scrollto::before {
+			display: block;
+			content: '';
+			position: relative;
+			font-size: 0;
+			line-height: 0;
+			width: 0;
+			border-top: 45px solid #fff;
+			border-left: 35px solid transparent;
+			border-right: 35px solid transparent;
+			left: 26px;
+			top: 46px;
+		}
+
 		.app__scrollto:hover {
-			color: #008BE5;
+			opacity: .9;
 		}
 
 	.app__chart {
@@ -258,6 +279,7 @@ a { color: #46b8da }
 
 	.config__label {
 		color: #fff;
+		text-align: left;
 		cursor: pointer;
 		display: inline-block;
 		padding: 4px 20px 4px;
@@ -265,6 +287,7 @@ a { color: #46b8da }
 		left: -1px;
 		position: relative;
 		font-size: 20px;
+		opacity: .8;
 		background: #777;
 		border-radius: 2px 2px 0 0;
 	}
@@ -273,6 +296,7 @@ a { color: #46b8da }
 		}
 
 		.config__label_true {
+			opacity: 1;
 			background-color: #5cb85c;
 		}
 
