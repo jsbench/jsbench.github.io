@@ -216,18 +216,20 @@
 		},
 
 		addStat: function (stat) {
-			var gist = this.attrs.gist;
-			var data = {
-				name: Benchmark.platform.name + ' ' + Benchmark.platform.version,
-				hz: stat
-			};
+			if (stat) {
+				var gist = this.attrs.gist;
+				var data = {
+					name: Benchmark.platform.name + ' ' + Benchmark.platform.version,
+					hz: stat
+				};
 
-			this._lastAddedStats = stat;
-			this._stats.push(data);
-			this.setStats(this._stats);
+				this._lastAddedStats = stat;
+				this._stats.push(data);
+				this.setStats(this._stats);
 
-			if (gist.id) {
-				firebase.child('stats').child(gist.id).child(getGistLastRevisionId(gist)).push(data);
+				if (gist.id) {
+					firebase.child('stats').child(gist.id).child(getGistLastRevisionId(gist)).push(data);
+				}
 			}
 		},
 
