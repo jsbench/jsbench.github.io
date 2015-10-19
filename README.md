@@ -12,3 +12,8 @@ JavaScript benchmark playground.
  - [x] Adding to favorites :star2:
  - [ ] Comments to the tests
  - [ ] History of revisions and forks
+
+
+## Examples
+ - [Array#forEach](http://jsbench.github.io/#934845e96f163934870e)
+ - [String#includes vs. String#indexOf vs. RegExp](http://jsbench.github.io/#a4612afd0cd26e911ee8)
