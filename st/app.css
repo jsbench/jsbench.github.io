@@ -170,6 +170,20 @@ a { color: #46b8da }
 		padding: 30px 0;
 	}
 
+	.app__comments {
+		padding: 15px;
+		background-color: #fff;
+	}
+
+	.app__github {
+		text-align: center;
+		border-top: 2px solid #ccc;
+		padding: 20px;
+	}
+		.app__github > * {
+			margin: 0 10px;
+		}
+
 
 .snippet {
 	padding: 10px 15px;

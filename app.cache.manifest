@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# Версия 0.2.0
+# Версия 0.3.0
 
 
 CACHE:
@@ -21,6 +21,7 @@ http://jsbench.github.io/src/github.js
 http://jsbench.github.io/src/chart.js
 http://jsbench.github.io/src/editor.js
 http://jsbench.github.io/src/app.js
+https://buttons.github.io/buttons.js
 
 
 NETWORK:

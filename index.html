@@ -80,6 +80,20 @@
 			<fn:var name="user" value="{attrs.gist.owner || attrs.user}"/>
 		</div>
 
+		<div bem:elem="github">
+			<a class="github-button" href="https://github.com/jsbench/jsbench.github.io" data-style="mega"
+			   data-count-href="/jsbench/jsbench.github.io/stargazers"
+			   data-count-api="/repos/jsbench/jsbench.github.io#stargazers_count"
+			   data-count-aria-label="# stargazers on GitHub"
+			   aria-label="Star jsbench/jsbench.github.io on GitHub">Star</a>
+
+			<a class="github-button" href="https://github.com/jsbench/jsbench.github.io/issues"
+			   data-icon="octicon-issue-opened" data-style="mega"
+			   data-count-api="/repos/jsbench/jsbench.github.io#open_issues_count"
+			   data-count-aria-label="# issues on GitHub"
+			   aria-label="Issue jsbench/jsbench.github.io on GitHub">Issue</a>
+		</div>
+
 		<fn:for data="['setup', 'teardown']" as="name">
 			<div bem:block="config" bem:mod="{name}">
 				<div bem:elem="label" bem:mod="{!!attrs[name].code.trim()}" remit:click="configure" event:details="attrs[name]">
@@ -90,6 +104,18 @@
 				</fn:if>
 			</div>
 		</fn:for>
+	</div>
+</script>
+
+<script id="comment-form-template" type="text/html">
+	<div>
+		<div bem:elem="user">
+			.login
+			.url
+			.avatar_url
+			.created_at
+			.body
+		</div>
 	</div>
 </script>
 
@@ -130,6 +156,9 @@
 <script src="src/chart.js"></script>
 <script src="src/editor.js"></script>
 <script src="src/app.js"></script>
+
+<!-- Github Buttons -->
+<script async defer id="github-bjs" src="https://buttons.github.io/buttons.js"></script>
 
 </body>
 </html>
