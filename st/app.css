@@ -178,7 +178,7 @@ a { color: #46b8da }
 	.app__github {
 		text-align: center;
 		border-top: 2px solid #ccc;
-		padding: 20px;
+		padding: 30px;
 	}
 		.app__github > * {
 			margin: 0 10px;
