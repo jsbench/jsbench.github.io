@@ -54,8 +54,8 @@
 			var _this = this;
 
 			window.onbeforeunload = function () {
-				if (!_this.attrs.gist.id) {
-					return _this._lastAddedStats ? 'Your changes and test results have not been saved!' : 'Your changes have not been saved!';
+				if (!_this.attrs.gist.id && _this._lastAddedStats) {
+					return 'Your changes and test results have not been saved!';
 				} else if (JSON.stringify(_this._initialData) != JSON.stringify(_this.toJSON())) {
 					return 'Your changes have not been saved!';
 				}
