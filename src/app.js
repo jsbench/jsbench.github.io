@@ -53,6 +53,14 @@
 		didMount: function () {
 			var _this = this;
 
+			window.onbeforeunload = function () {
+				if (!_this.attrs.gist.id) {
+					return _this._lastAddedStats ? 'Your changes and test results have not been saved!' : 'Your changes have not been saved!';
+				} else if (JSON.stringify(_this._initialData) != JSON.stringify(_this.toJSON())) {
+					return 'Your changes have not been saved!';
+				}
+			};
+
 			window.onhashchange = function () {
 				new Promise(function (resolve, reject) {
 					if (_this.attrs.running) {
@@ -190,6 +198,9 @@
 					_this.snippets = [newSnippet()];
 				}
 
+				// Используется при unload
+				_this._initialData = _this.toJSON();
+
 				// Cохраняем в `hash` и `localStorage` раз в 1sec
 				_this._saveId = setInterval(function () {
 					if (!attrs.gist.id) {
@@ -270,8 +281,8 @@
 
 			return {
 				desc: attrs.desc,
-				setup: attrs.setup,
-				teardown: attrs.teardown,
+				setup: {code: attrs.setup.code},
+				teardown: {code: attrs.teardown},
 				snippets: this.snippets.map(function (snippet) {
 					return snippet.code;
 				})
