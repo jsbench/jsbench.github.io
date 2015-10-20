@@ -58,7 +58,10 @@
 				var url = 'gists/' + id;
 				var promise;
 
-				if (github.currentUser) {
+				if (_gists[id]) { // Cache
+					promise = Promise.resolve(_gists[id]);
+				}
+				else if (github.currentUser) {
 					promise = _call('get', url)['catch'](function () {
 						github.setUser(null);
 

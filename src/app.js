@@ -51,9 +51,33 @@
 		snippets: [],
 
 		didMount: function () {
+			var _this = this;
+
 			window.onhashchange = function () {
-				this.routing();
-			}.bind(this);
+				new Promise(function (resolve, reject) {
+					if (_this.attrs.running) {
+						swal({
+							title: 'Are you sure?',
+							type: 'warning',
+							showCancelButton: true,
+							confirmButtonColor: '#A5DC86',
+							confirmButtonText: 'Continue',
+							cancelButtonText: 'Abort'
+						}, function (isConfirm) {
+							if (!isConfirm) {
+								_this._suite.abort();
+								resolve();
+							} else {
+								reject();
+							}
+						});
+					} else {
+						resolve();
+					}
+				}).then(function () {
+					_this.routing();
+				});
+			};
 
 			this.routing();
 		},
@@ -84,8 +108,16 @@
 				setup: {code: ''},
 				teardown: {code: ''},
 				starred: false,
+				running: false,
 				results: null
 			}, null, true);
+
+			clearInterval(_this._saveId);
+
+			// Чистим статус
+			Object.keys(_this.refs).forEach(function (name) {
+				/^stat/.test(name) && (_this.refs[name].innerHTML = '');
+			});
 
 			new Promise(function (resolve) {
 				var restoredData;
@@ -159,7 +191,7 @@
 				}
 
 				// Cохраняем в `hash` и `localStorage` раз в 1sec
-				setInterval(function () {
+				_this._saveId = setInterval(function () {
 					if (!attrs.gist.id) {
 						var jsonStr = JSON.stringify(_this.toJSON());
 
@@ -280,27 +312,35 @@
 			suite
 				.on('cycle', function (evt) {
 					var stat = evt.target;
-					refs['stats-' + stat.name].innerHTML = toStringBench(stat);
+					var el = refs['stats-' + stat.name];
+
+					!suite.aborted && (refs['stats-' + stat.name].innerHTML = toStringBench(stat));
 				})
 				.on('complete', function (evt) {
-					var results = evt.currentTarget;
+					if (!suite.aborted) {
+						var results = evt.currentTarget;
 
-					suite.filter('fastest').forEach(function (stat) {
-						index[stat.name].status = 'fastest';
-					});
+						suite.filter('fastest').forEach(function (stat) {
+							index[stat.name].status = 'fastest';
+						});
 
-					suite.filter('slowest').forEach(function (stat) {
-						index[stat.name].status = 'slowest';
-					});
+						suite.filter('slowest').forEach(function (stat) {
+							index[stat.name].status = 'slowest';
+						});
 
-					_this.addStat(results.map(function (bench) { return bench.hz; }));
+						_this.addStat(results.map(function (bench) {
+							return bench.hz;
+						}));
 
-					_this.set('running', false);
-					_this.refs.scrollTo.style.display = '';
+						_this.set('running', false);
+						_this.refs.scrollTo.style.display = '';
+					}
 				});
 
 			_this.set('running', true);
+
 			suite.run({'async': true});
+			_this._suite = suite;
 		},
 
 		handleSuiteSave: function () {
