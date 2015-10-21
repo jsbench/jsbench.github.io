@@ -173,9 +173,9 @@
 								return values[key];
 							}));
 						});
-
-						resolve();
-					}, resolve);
+					})
+						['catch'](showError())
+						.then(resolve);
 				} else {
 					// Пробуем восстановить код из `localStorage`
 					try {

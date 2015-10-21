@@ -72,8 +72,12 @@
 				}
 				else {
 					promise = fetch(API_ENDPOINT + url).then(function (res) {
+						if (res.status != 200) {
+							throw 'Error: ' + res.status;
+						}
+
 						return res.json();
-					}, function () {
+					})['catch'](function () {
 						return _call('get', url);
 					});
 				}
