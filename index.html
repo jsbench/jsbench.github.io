@@ -45,7 +45,7 @@
 
 		<div bem:elem="snippets">
 			<fn:for data="_this.snippets" as="snippet">
-				<div bem:block="snippet">
+				<div key="{snippet.id}" bem:block="snippet">
 					<bem:mod name="{snippet.status}"/>
 
 					<div bem:elem="stats" ref="stats-{snippet.id}"></div>
@@ -55,7 +55,6 @@
 						<i bem:elem="remove" remit:click="snippet:remove" event:details="snippet"/>
 						<b:editor key="{snippet.id}" data="{snippet}"/>
 					</div>
-
 				</div>
 			</fn:for>
 		</div>
