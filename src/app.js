@@ -271,13 +271,13 @@
 					hz: stat
 				};
 
+				this._latestUnsavedResults = stat;
 				this._stats.push(data);
 				this.setStats(this._stats);
 
 				if (gist.id && !this.hasChanges()) {
+					this._latestUnsavedResults = null;
 					firebase.child('stats').child(gist.id).child(getGistLastRevisionId(gist)).push(data);
-				} else {
-					this._latestUnsavedResults = stat;
 				}
 			}
 		},
@@ -555,5 +555,5 @@
 
 	// Init
 	OAuth.initialize(OAUTH_PUBLIC_KEY);
-	new UIApp().renderTo(document.getElementById('canvas'));
+	window.app = new UIApp().renderTo(document.getElementById('canvas'));
 })(window.feast, window.Benchmark, window.OAuth, window.github, window.sweetAlert);
