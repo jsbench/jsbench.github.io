@@ -501,7 +501,7 @@
 	//
 
 	function showError(err) {
-		swal('Oops...', err.message, 'error');
+		swal('Oops...', (err && err.message || 'Something went wrong'), 'error');
 	}
 
 	function newSnippet(code) {
