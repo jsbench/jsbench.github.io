@@ -38,7 +38,7 @@
 					{
 						chartArea: {
 							top: 0,
-							left: '15%',
+							left: '20%',
 							width: '65%',
 							height: '95%'
 						},

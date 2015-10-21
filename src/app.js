@@ -46,21 +46,26 @@
 		},
 
 		_stats: [],
-		_lastAddedStats: null, // последний результат тестов, чтобы при save, добавить их в базу
+		_latestData: null,
+		_latestUnsavedResults: null, // последний результат тестов, чтобы при save, добавить их в базу
 
 		snippets: [],
+
+		hasChanges: function () {
+			return JSON.stringify(this._latestData) != JSON.stringify(this.toJSON())
+		},
 
 		didMount: function () {
 			var _this = this;
 
+			// Предупреждалка
 			window.onbeforeunload = function () {
-				if (_this.attrs.gist.id && JSON.stringify(_this._initialData) != JSON.stringify(_this.toJSON())) {
-					return 'Your changes have not been saved!';
-				} else if (_this._lastAddedStats) {
+				if (!_this.attrs.gist.id && _this.hasChanges() || _this._latestUnsavedResults) {
 					return 'Your changes and test results have not been saved!';
 				}
 			};
 
+			// Роутинг
 			window.onhashchange = function () {
 				new Promise(function (resolve, reject) {
 					if (_this.attrs.running) {
@@ -104,7 +109,7 @@
 			}
 
 			_this._prevJSONStr = '';
-			_this._lastAddedStats = null;
+			_this._latestUnsavedResults = null;
 			_this.snippets = [];
 
 			_this.refs.scrollTo.style.display = 'none';
@@ -199,7 +204,7 @@
 				}
 
 				// Используется при unload
-				_this._initialData = _this.toJSON();
+				_this._latestData = _this.toJSON();
 
 				// Cохраняем в `hash` и `localStorage` раз в 1sec
 				_this._saveId = setInterval(function () {
@@ -266,12 +271,13 @@
 					hz: stat
 				};
 
-				this._lastAddedStats = stat;
 				this._stats.push(data);
 				this.setStats(this._stats);
 
-				if (gist.id) {
+				if (gist.id && !this.hasChanges()) {
 					firebase.child('stats').child(gist.id).child(getGistLastRevisionId(gist)).push(data);
+				} else {
+					this._latestUnsavedResults = stat;
 				}
 			}
 		},
@@ -454,7 +460,7 @@
 
 							if (isNew) {
 								github.gist.save(gist.id, desc + ' (' + location.toString() + ') ' + GIST_TAGS);
-								_this.addStat(_this._lastAddedStats);
+								_this.addStat(_this._latestUnsavedResults);
 							}
 
 							return gist;
@@ -469,6 +475,7 @@
 					return (gist.id && gist.owner.id != user.id) ? github.gist.fork(gist.id).then(save) : save(gist);
 				})
 					['catch'](showError).then(function () {
+						_this._latestData = _this.toJSON();
 						_this.set('saving', false);
 					});
 		},
