@@ -215,7 +215,7 @@
 							_this._prevJSONStr = jsonStr;
 
 							try {
-								location.hash = encodeURIComponent(jsonStr);
+								//location.hash = encodeURIComponent(jsonStr);
 								localStorage.setItem(STORE_SNIPPETS_KEY, jsonStr);
 							} catch (err) {}
 						}
@@ -364,7 +364,7 @@
 			var _this = this;
 			var attrs = _this.attrs;
 			var gist = attrs.gist;
-			var desc = (attrs.desc || 'Benchmark');
+			var desc = (attrs.desc || 'Untitled benchmark');
 			var suiteCode = [
 				'"use strict";',
 				'',
@@ -398,7 +398,7 @@
 				_this.snippets.map(function (snippet) {
 					return [
 						'	suite.add(' + JSON.stringify(getName(snippet)) + ', function () {',
-						'		' + snippet.code.trim().split('\n').join('\n\t\t'),
+						'		' + (snippet.code || '').trim().split('\n').join('\n\t\t'),
 						'	});'
 					].join('\n');
 				}).join('\n\n'),
