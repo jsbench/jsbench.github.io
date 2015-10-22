@@ -4,6 +4,32 @@
 	var SCREEN_WIDTH = screen.width;
 	var SCREEN_HEIGHT = screen.height;
 
+	function generateChartsAsBlob(app, width, height) {
+		var el = document.createElement('div');
+		var chart = new UIChart({
+			data: app.get('results'),
+			mode: 'fit'
+		});
+
+		el.className = 'invisible';
+		el.style.width = width + 'px';
+		el.style.height = height + 'px';
+
+		document.body.appendChild(el);
+		chart.renderTo(el);
+
+		return new Promise(function (resolve) {
+			setTimeout(function () {
+				var dataURI = chart.toDataURI();
+
+				chart.destroy();
+				document.body.removeChild(el);
+
+				resolve(dataURLtoBlob(dataURI));
+			}, 300);
+		});
+	}
+
 	var twttr = {
 		url: 'https://twitter.com/intent/tweet?text=',
 		length: 140,
@@ -62,30 +88,12 @@
 		},
 
 		facebook: function (desc, url, tags, app) {
-			var el = document.createElement('div');
-			var chart = new UIChart({
-				data: app.get('results'),
-				mode: 'fit'
-			});
-
-			el.className = 'invisible';
-			el.style.width = facebook.width + 'px';
-			el.style.height = facebook.height + 'px';
-
-			document.body.appendChild(el);
-			chart.renderTo(el);
-
-			return new Promise(function (resolve) {
-				setTimeout(function () {
-					var dataURI = chart.toDataURI();
-
-					chart.destroy();
-					document.body.removeChild(el);
-
-					resolve(dataURLtoBlob(dataURI));
-				}, 300);
-			}).then(function (file) {
-				return facebook.login().then(function () {
+			return Promise.all([
+				facebook.login(),
+				generateChartsAsBlob(app, facebook.width, facebook.height)
+			])
+				.then(function (results) {
+					var file = results[1];
 					var formData = new FormData();
 
 					formData.append('access_token', facebook.token);
@@ -104,7 +112,6 @@
 						}
 					});
 				});
-			});
 		}
 	};
 })(window.fetch, window.sweetAlert);
