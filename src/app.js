@@ -1,4 +1,4 @@
-(function (feast, Benchmark, OAuth, github, swal) {
+(function (feast, Benchmark, OAuth, github, share, swal) {
 	'use strict';
 
 	var gid = 1;
@@ -35,6 +35,7 @@
 			'snippet:add': 'handleSuiteAdd',
 			'snippet:remove': 'handleSuiteRemove',
 			'gist:star': 'handleStar',
+			'share': 'handleShare',
 			'configure': 'handleConfigure',
 			'scrollTo': 'handleScrollTo'
 		},
@@ -92,7 +93,9 @@
 				});
 			};
 
-			this.routing();
+			this.routing().then(function () {
+				document.body.className = document.body.className.replace('state-initialization', 'state-ready');
+			});
 		},
 
 		routing: function () {
@@ -132,7 +135,7 @@
 				/^stat/.test(name) && (_this.refs[name].innerHTML = '');
 			});
 
-			new Promise(function (resolve) {
+			return new Promise(function (resolve) {
 				var restoredData;
 
 				// Gist ID
@@ -198,37 +201,34 @@
 
 					resolve();
 				}
-			}).then(function () {
-				if (!Array.isArray(_this.snippets) || !_this.snippets.length) {
-					_this.snippets = [newSnippet()];
-				}
-
-				// Используется при unload
-				_this._latestData = _this.toJSON();
-
-				// Cохраняем в `hash` и `localStorage` раз в 1sec
-				_this._saveId = setInterval(function () {
-					if (!attrs.gist.id) {
-						var jsonStr = JSON.stringify(_this.toJSON());
-
-						if (_this._prevJSONStr !== jsonStr) {
-							_this._prevJSONStr = jsonStr;
-
-							try {
-								//location.hash = encodeURIComponent(jsonStr);
-								localStorage.setItem(STORE_SNIPPETS_KEY, jsonStr);
-							} catch (err) {}
-						}
+			})
+				['catch'](showError)
+				.then(function () {
+					if (!Array.isArray(_this.snippets) || !_this.snippets.length) {
+						_this.snippets = [newSnippet()];
 					}
-				}, 1000);
 
-				_this.render();
-			}, function (err) {
-				showError(err);
+					// Используется при unload
+					_this._latestData = _this.toJSON();
 
-				_this.snippets = [newSnippet()];
-				_this.render();
-			});
+					// Cохраняем в `hash` и `localStorage` раз в 1sec
+					_this._saveId = setInterval(function () {
+						if (!attrs.gist.id) {
+							var jsonStr = JSON.stringify(_this.toJSON());
+
+							if (_this._prevJSONStr !== jsonStr) {
+								_this._prevJSONStr = jsonStr;
+
+								try {
+									//location.hash = encodeURIComponent(jsonStr);
+									localStorage.setItem(STORE_SNIPPETS_KEY, jsonStr);
+								} catch (err) {}
+							}
+						}
+					}, 1000);
+
+					_this.render();
+				});
 		},
 
 		setStats: function (values) {
@@ -493,6 +493,16 @@
 		handleScrollTo: function () {
 			this.refs.scrollTo.style.display = 'none';
 			this.refs.chart.scrollIntoView();
+		},
+
+		handleShare: function (evt) {
+			var service = evt.details;
+
+			Promise.resolve(
+				share[service](this.attrs.desc, location.toString(), GIST_TAGS, this)
+			).then(function () {
+				swal(service.charAt(0).toUpperCase() + service.substr(1), 'The test results is shared', 'success');
+			}, showError);
 		}
 	});
 
@@ -501,7 +511,13 @@
 	//
 
 	function showError(err) {
-		swal('Oops...', (err && err.message || 'Something went wrong'), 'error');
+		var message = (err && err.message || 'Something went wrong');
+
+		if (err instanceof Error) {
+			console.error(err.stack);
+		}
+
+		swal('Oops...', message, 'error');
 	}
 
 	function newSnippet(code) {
@@ -556,4 +572,4 @@
 	// Init
 	OAuth.initialize(OAUTH_PUBLIC_KEY);
 	window.app = new UIApp().renderTo(document.getElementById('canvas'));
-})(window.feast, window.Benchmark, window.OAuth, window.github, window.sweetAlert);
+})(window.feast, window.Benchmark, window.OAuth, window.github, window.share, window.sweetAlert);

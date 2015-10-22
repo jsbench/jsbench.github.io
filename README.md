@@ -7,6 +7,10 @@ JavaScript benchmark playground.
 ## Features
  - [x] Intuitive and user-friendly interface (all in one screen: snippets, test results and graphics)
  - [x] Editor with code highlighting
+ - [x] Sharing test results
+   - [x] Facebook
+   - [x] Twitter
+   - [ ] Google Plus
  - [x] Sync with your gist-account
  - [x] Search: https://gist.github.com/search?l=javascript&q=jsbench&utf8=%E2%9C%93
  - [x] Adding to favorites :star2:

@@ -7,7 +7,7 @@
 	 */
 	feast.Block.extend(/** @lends UIEditor# */{
 		name: 'editor',
-		template: feast.parse('<div/>'),
+		template: feast.parse('<div bem:mod="{attrs.mode}"/>'),
 
 		didMount: function () {
 			var _this = this;

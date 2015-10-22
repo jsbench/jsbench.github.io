@@ -1,11 +1,12 @@
 CACHE MANIFEST
-# Build 8
+# Build 10
 
 
 CACHE:
 https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.1.14/es5-shim.min.js
 https://cdnjs.cloudflare.com/ajax/libs/es6-promise/3.0.2/es6-promise.min.js
 https://cdnjs.cloudflare.com/ajax/libs/fetch/0.10.0/fetch.min.js
+http://jsbench.github.io/vendor/canvas-to-blob.js
 https://www.google.com/jsapi
 https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.0/ace.min.js
 https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.0/mode-javascript.js
@@ -18,6 +19,7 @@ https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.0/sweetalert.min.js
 https://cdn.firebase.com/js/client/2.3.1/firebase.js
 http://jsbench.github.io/src/btn.js
 http://jsbench.github.io/src/github.js
+http://jsbench.github.io/src/share.js
 http://jsbench.github.io/src/chart.js
 http://jsbench.github.io/src/editor.js
 http://jsbench.github.io/src/app.js

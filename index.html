@@ -4,13 +4,16 @@
 	<meta charset="utf-8"/>
 	<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 	<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+	<meta name="description" content="JSBench — JavaScript benchmark playground. User-friendly interface, sync with your github, code highlighting and etc."/>
 	<meta property="og:image" content="/st/og-image.png"/>
 
 	<link href="./st/favicon.ico" rel="icon" type="image/x-icon" />
+	<link href="./st/app.css" rel="stylesheet"/>
 
 	<title>JavaScript benchmark playground</title>
 </head>
-<body class="no-auth">
+<body class="no-auth state-initialization">
 
 <div id="canvas"></div>
 
@@ -55,6 +58,7 @@
 						<i bem:elem="remove" remit:click="snippet:remove" event:details="snippet"/>
 						<b:editor key="{snippet.id}" data="{snippet}"/>
 					</div>
+
 				</div>
 			</fn:for>
 		</div>
@@ -79,7 +83,13 @@
 			<fn:var name="user" value="{attrs.gist.owner || attrs.user}"/>
 		</div>
 
-		<div bem:elem="github">
+		<div bem:elem="social">
+			<div bem:elem="share">
+				<fn:for data="['facebook', 'twitter']" as="service">
+					<img remit:click="share" event:details="service" src="./st/{service}.svg"/>
+				</fn:for>
+			</div>
+
 			<a class="github-button" href="https://github.com/jsbench/jsbench.github.io" data-style="mega"
 			   data-count-href="/jsbench/jsbench.github.io/stargazers"
 			   data-count-api="/repos/jsbench/jsbench.github.io#stargazers_count"
@@ -122,6 +132,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.1.14/es5-shim.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/es6-promise/3.0.2/es6-promise.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/fetch/0.10.0/fetch.min.js"></script>
+<script src="./vendor/canvas-to-blob.js"></script>
 
 <!-- Google jsapi -->
 <script type="text/javascript" src="https://www.google.com/jsapi"></script>
@@ -149,11 +160,11 @@
 <script src="https://cdn.firebase.com/js/client/2.3.1/firebase.js"></script>
 
 <!-- Application -->
-<link href="./st/app.css" rel="stylesheet"/>
 <script src="src/btn.js"></script>
 <script src="src/github.js"></script>
 <script src="src/chart.js"></script>
 <script src="src/editor.js"></script>
+<script src="src/share.js"></script>
 <script src="src/app.js"></script>
 
 <!-- Github Buttons -->
