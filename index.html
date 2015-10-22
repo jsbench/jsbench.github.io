@@ -84,23 +84,29 @@
 		</div>
 
 		<div bem:elem="social">
-			<div bem:elem="share">
-				<fn:for data="['facebook', 'twitter']" as="service">
-					<img remit:click="share" event:details="service" src="./st/{service}.svg"/>
-				</fn:for>
-			</div>
+			<fn:if test="attrs.gist.id">
+				<div bem:elem="share">
+					<fn:for data="['facebook', 'twitter']" as="service">
+						<img remit:click="share" event:details="service" src="./st/{service}.svg"/>
+					</fn:for>
+				</div>
+			</fn:if>
 
-			<a class="github-button" href="https://github.com/jsbench/jsbench.github.io" data-style="mega"
-			   data-count-href="/jsbench/jsbench.github.io/stargazers"
-			   data-count-api="/repos/jsbench/jsbench.github.io#stargazers_count"
-			   data-count-aria-label="# stargazers on GitHub"
-			   aria-label="Star jsbench/jsbench.github.io on GitHub">Star</a>
+			<span>
+				<a class="github-button" href="https://github.com/jsbench/jsbench.github.io" data-style="mega"
+				   data-count-href="/jsbench/jsbench.github.io/stargazers"
+				   data-count-api="/repos/jsbench/jsbench.github.io#stargazers_count"
+				   data-count-aria-label="# stargazers on GitHub"
+				   aria-label="Star jsbench/jsbench.github.io on GitHub">Star</a>
+			</span>
 
-			<a class="github-button" href="https://github.com/jsbench/jsbench.github.io/issues"
-			   data-icon="octicon-issue-opened" data-style="mega"
-			   data-count-api="/repos/jsbench/jsbench.github.io#open_issues_count"
-			   data-count-aria-label="# issues on GitHub"
-			   aria-label="Issue jsbench/jsbench.github.io on GitHub">Issue</a>
+			<span>
+				<a class="github-button" href="https://github.com/jsbench/jsbench.github.io/issues"
+				   data-icon="octicon-issue-opened" data-style="mega"
+				   data-count-api="/repos/jsbench/jsbench.github.io#open_issues_count"
+				   data-count-aria-label="# issues on GitHub"
+				   aria-label="Issue jsbench/jsbench.github.io on GitHub">Issue</a>
+			</span>
 		</div>
 
 		<fn:for data="['setup', 'teardown']" as="name">
@@ -129,10 +135,14 @@
 </script>
 
 <!-- Polyfills -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.1.14/es5-shim.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/es6-promise/3.0.2/es6-promise.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/fetch/0.10.0/fetch.min.js"></script>
-<script src="./vendor/canvas-to-blob.js"></script>
+<script>
+	function include(src) { document.write('<script src="' + src + '"></' + 'script>'); }
+
+	[].forEach || include('https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.1.14/es5-shim.min.js');
+	window.Promise || include('https://cdnjs.cloudflare.com/ajax/libs/es6-promise/3.0.2/es6-promise.min.js');
+	window.fetch || include('https://cdnjs.cloudflare.com/ajax/libs/fetch/0.10.0/fetch.min.js');
+	include('./vendor/canvas-to-blob.js');
+</script>
 
 <!-- Google jsapi -->
 <script type="text/javascript" src="https://www.google.com/jsapi"></script>

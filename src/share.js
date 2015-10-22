@@ -5,28 +5,28 @@
 	var SCREEN_HEIGHT = screen.height;
 
 	function generateChartsAsBlob(app, width, height) {
-		var el = document.createElement('div');
-		var chart = new UIChart({
-			data: app.get('results'),
-			mode: 'fit'
-		});
-
-		el.className = 'invisible';
-		el.style.width = width + 'px';
-		el.style.height = height + 'px';
-
-		document.body.appendChild(el);
-		chart.renderTo(el);
-
 		return new Promise(function (resolve) {
-			setTimeout(function () {
+			var el = document.createElement('div');
+			var chart = new UIChart({
+				data: app.get('results'),
+				mode: 'fit'
+			});
+
+			el.className = 'invisible';
+			el.style.width = width + 'px';
+			el.style.height = height + 'px';
+
+			chart.on('ready', function () {
 				var dataURI = chart.toDataURI();
 
 				chart.destroy();
 				document.body.removeChild(el);
 
 				resolve(dataURLtoBlob(dataURI));
-			}, 300);
+			});
+
+			document.body.appendChild(el);
+			chart.renderTo(el);
 		});
 	}
 
@@ -42,9 +42,12 @@
 		publishUrl: 'https://graph.facebook.com/me/photos',
 		width: 1200,
 		height: 630,
-		login: function () {
-			return this._promise || (this._promise = new Promise(function (resolve, reject) {
+
+		init: function () {
+			return this._promiseInit || (this._promiseInit = new Promise(function (resolve) {
 				window.fbAsyncInit = function () {
+					var FB = window.FB;
+
 					FB.init({
 						appId: facebook.id,
 						version: 'v2.5',
@@ -52,17 +55,8 @@
 						oauth: true
 					});
 
-					FB.login(function (response) {
-						if (response.authResponse) {
-							facebook.token = response.authResponse.accessToken;
-							resolve(FB);
-						} else {
-							swal('Oops...', 'Auth fail', 'error');
-							reject();
-						}
-					}, {
-						scope: 'publish_actions'
-					});
+					facebook.api = FB;
+					resolve(FB);
 				};
 
 				(function (d, s, id) {
@@ -73,6 +67,23 @@
 					js.src = "//connect.facebook.net/en_US/sdk.js";
 					fjs.parentNode.insertBefore(js, fjs);
 				}(document, 'script', 'facebook-jssdk'));
+			}));
+		},
+
+		login: function () {
+			return this._promiseLogin || (this._promiseLogin = this.init().then(function (api) {
+				return new Promise(function (resolve, reject) {
+					api.login(function (response) {
+						if (response.authResponse) {
+							facebook.token = response.authResponse.accessToken;
+							resolve();
+						} else {
+							reject(new Error('Access denied'));
+						}
+					}, {
+						scope: 'publish_actions'
+					});
+				});
 			}));
 		}
 	};
@@ -108,10 +119,16 @@
 						if (response.status >= 200 && response.status < 300) {
 							return response;
 						} else {
-							throw new Error(response.statusText);
+							return response.json().then(function (json) {
+								throw new Error(json.error.message);
+							});
 						}
 					});
 				});
+		},
+
+		init: function () {
+			facebook.init();
 		}
 	};
 })(window.fetch, window.sweetAlert);

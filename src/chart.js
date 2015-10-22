@@ -11,14 +11,17 @@
 
 		attrChanged: {
 			'data': function () {
-				this.redraw();
+				this.visualization && this.redraw();
 			}
 		},
 
 		didMount: function () {
 			google.load('visualization', '1', {
 				packages: ['corechart', 'bar'],
-				callback: this.redraw.bind(this)
+				callback: function () {
+					this.visualization = true;
+					this.redraw();
+				}.bind(this)
 			});
 		},
 
@@ -26,7 +29,13 @@
 			var data = this.attrs.data;
 
 			if (google.visualization && data) {
-				this.chart = this.chart || new google.visualization.BarChart(this.el);
+				if (!this.chart) {
+					this.chart = new google.visualization.BarChart(this.el);
+
+					google.visualization.events.addListener(this.chart, 'ready', function () {
+						this.broadcast('ready');
+					}.bind(this));
+				}
 
 				this.chart.draw(
 					// Data

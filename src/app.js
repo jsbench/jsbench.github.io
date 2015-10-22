@@ -95,6 +95,7 @@
 
 			this.routing().then(function () {
 				document.body.className = document.body.className.replace('state-initialization', 'state-ready');
+				share.init();
 			});
 		},
 
@@ -210,6 +211,7 @@
 
 					// Используется при unload
 					_this._latestData = _this.toJSON();
+					_this._prevJSONStr = JSON.stringify(_this.toJSON());
 
 					// Cохраняем в `hash` и `localStorage` раз в 1sec
 					_this._saveId = setInterval(function () {
