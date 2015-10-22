@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# Build 11
+# Build 12
 
 
 CACHE:
@@ -28,7 +28,7 @@ http://jsbench.github.io/st/app.css
 http://jsbench.github.io/st/facebook.svg
 http://jsbench.github.io/st/favicon.ico
 http://jsbench.github.io/st/google.svg
-http://jsbench.github.io/st/og-image.svg
+http://jsbench.github.io/st/og-image.png
 http://jsbench.github.io/st/twitter.svg
 
 
