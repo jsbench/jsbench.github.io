@@ -17,8 +17,8 @@
 
 			editor.setTheme('ace/theme/tomorrow');
 			editor.getSession().setMode('ace/mode/javascript');
-			editor.setOption('maxLines', 30);
-			editor.setOption('minLines', 4);
+			editor.setOption('maxLines', this.attrs['max-lines'] || 30);
+			editor.setOption('minLines', this.attrs['min-lines'] || 4);
 
 			editor.on('change', function () {
 				_this.attrs.data.code = editor.getValue();

@@ -114,8 +114,9 @@
 				<div bem:elem="label" bem:mod="{!!attrs[name].code.trim()}" remit:click="configure" event:details="attrs[name]">
 					<fn:value>name</fn:value>
 				</div>
+
 				<fn:if test="attrs[name].visible">
-					<b:editor key="{name}" data="{attrs[name]}"/>
+					<b:editor key="{name}" data="{attrs[name]}" min-lines="20"/>
 				</fn:if>
 			</div>
 		</fn:for>
