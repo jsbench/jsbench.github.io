@@ -156,7 +156,6 @@
 
 						while (matches = R_CONFIG.exec(gist.files['suite.js'].content)) {
 							attrs[matches[1]] = {
-								enabled: true,
 								code: matches[2].replace(/\n\t\t/g, '\n').trim() + '\n'
 							}
 						}
@@ -290,7 +289,7 @@
 			return {
 				desc: attrs.desc,
 				setup: {code: attrs.setup.code},
-				teardown: {code: attrs.teardown},
+				teardown: {code: attrs.teardown.code},
 				snippets: this.snippets.map(function (snippet) {
 					return snippet.code;
 				})
@@ -320,8 +319,8 @@
 
 				suite.add(snippet.id, {
 					fn: snippet.code.trim(),
-					setup: attrs.setup.enabled ? attrs.setup.code : '',
-					teardown: attrs.teardown.enabled ? attrs.teardown.code : '',
+					setup: attrs.setup.code,
+					teardown: attrs.teardown.code,
 					onCycle: function (evt) {
 						refs['stats-' + snippet.id].innerHTML = toStringBench(evt.target);
 					}
@@ -381,7 +380,7 @@
 				'',
 
 				// Setup
-				(!attrs.setup.enabled ? '' : [
+				(!attrs.setup.code.trim() ? '' : [
 				'	Benchmark.prototype.setup = function () {',
 				'		' + attrs.setup.code.trim().split('\n').join('\n\t\t'),
 				'	};',
@@ -389,7 +388,7 @@
 				].join('\n')),
 
 				// Teardown
-				(!attrs.teardown.enabled ? '' : [
+				(!attrs.teardown.code.trim() ? '' : [
 				'	Benchmark.prototype.teardown = function () {',
 				'		' + attrs.teardown.code.trim().split('\n').join('\n\t\t'),
 				'	};',
@@ -537,7 +536,7 @@
 	}
 
 	function getName(snippet) {
-		return (snippet.code || snippet).trim().split('\n')[0].replace(/(^\/[*/]+|\**\/$)/g, '').trim();
+		return (snippet.code !== void 0 ? snippet.code : snippet).trim().split('\n')[0].replace(/(^\/[*/]+|\**\/$)/g, '').trim();
 	}
 
 	function toStringBench(bench) {

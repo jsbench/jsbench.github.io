@@ -57,6 +57,15 @@
 			findOne: function (id) {
 				var url = 'gists/' + id;
 				var promise;
+				var _fetch = function () {
+					return fetch(API_ENDPOINT + url).then(function (res) {
+						if (res.status != 200) {
+							throw 'Error: ' + res.status;
+						}
+
+						return res.json();
+					});
+				};
 
 				if (_gists[id]) { // Cache
 					promise = Promise.resolve(_gists[id]);
@@ -64,20 +73,11 @@
 				else if (github.currentUser) {
 					promise = _call('get', url)['catch'](function () {
 						github.setUser(null);
-
-						return fetch(API_ENDPOINT + url).then(function (res) {
-							return res.json();
-						});
+						return _fetch();
 					});
 				}
 				else {
-					promise = fetch(API_ENDPOINT + url).then(function (res) {
-						if (res.status != 200) {
-							throw 'Error: ' + res.status;
-						}
-
-						return res.json();
-					})['catch'](function () {
+					promise = _fetch()['catch'](function () {
 						return _call('get', url);
 					});
 				}
