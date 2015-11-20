@@ -1,4 +1,4 @@
-(function (OAuth) {
+(function (OAuth, swal) {
 	'use strict';
 
 	var API_ENDPOINT  = 'https://api.github.com/';
@@ -13,7 +13,26 @@
 	function _getApi() {
 		if (!_api) {
 			_api = new Promise(function (resolve, reject) {
-				OAuth.popup('github', {cache: true}).done(resolve).fail(reject);
+				OAuth.popup('github', {cache: true}).done(resolve).fail(function (err) {
+					if (err.toString().indexOf('popup')) {
+						swal({
+							title: 'Oops, required authorization!',
+							type: 'warning',
+							showCancelButton: true,
+							confirmButtonColor: '#A5DC86',
+							confirmButtonText: 'Sign in with GitHub',
+							cancelButtonText: 'Cancel'
+						}, function (isConfirm) {
+							if (isConfirm) {
+								OAuth.popup('github', {cache: true}).done(resolve).fail(reject);
+							} else {
+								reject();
+							}
+						});
+					} else {
+						reject();
+					}
+				});
 			});
 		}
 
@@ -141,4 +160,4 @@
 
 	_stars = _store(STORE_STARS_KEY) || {};
 	github.setUser(_store(STORE_USER_KEY));
-})(window.OAuth);
+})(window.OAuth, window.sweetAlert);
