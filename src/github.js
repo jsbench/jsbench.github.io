@@ -2,6 +2,8 @@
 	'use strict';
 
 	var API_ENDPOINT  = 'https://api.github.com/';
+	var API_STATUS_OK = 200;
+
 	var STORE_USER_KEY = 'jsbench-gihub-user';
 	var STORE_STARS_KEY = 'jsbench-gihub-stars';
 
@@ -78,7 +80,7 @@
 				var promise;
 				var _fetch = function () {
 					return fetch(API_ENDPOINT + url).then(function (res) {
-						if (res.status != 200) {
+						if (res.status != API_STATUS_OK) {
 							throw 'Error: ' + res.status;
 						}
 
