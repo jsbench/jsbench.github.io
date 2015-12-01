@@ -1,4 +1,4 @@
-(function (fetch, swal) {
+(function (fetch) {
 	'use strict';
 
 	var SCREEN_WIDTH = screen.width;
@@ -64,7 +64,7 @@
 					if (d.getElementById(id)) {return;}
 					js = d.createElement(s);
 					js.id = id;
-					js.src = "//connect.facebook.net/en_US/sdk.js";
+					js.src = '//connect.facebook.net/en_US/sdk.js';
 					fjs.parentNode.insertBefore(js, fjs);
 				}(document, 'script', 'facebook-jssdk'));
 			}));
@@ -94,8 +94,10 @@
 			var top = Math.max(Math.round((SCREEN_HEIGHT / 3) - (twttr.height / 2)), 0);
 			var left = Math.round((SCREEN_WIDTH / 2) - (twttr.width / 2));
 			var message = desc.substr(0, twttr.length - (url.length + tags.length + 5)) + ': ' + url + ' ' + tags;
+			var params = 'left=' + left + ',top=' + top + ',width=' + twttr.width + ',height=' + twttr.height;
+			var extras = ',personalbar=0,toolbar=0,scrollbars=1,resizable=1';
 
-			window.open(twttr.url + encodeURIComponent(message), '', 'left=' + left + ',top=' + top + ',width=' + twttr.width + ',height=' + twttr.height + ',personalbar=0,toolbar=0,scrollbars=1,resizable=1');
+			window.open(twttr.url + encodeURIComponent(message), '', params + extras);
 		},
 
 		facebook: function (desc, url, tags, app) {
@@ -131,4 +133,4 @@
 			facebook.init();
 		}
 	};
-})(window.fetch, window.sweetAlert);
+})(window.fetch);
