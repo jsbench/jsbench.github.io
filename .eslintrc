@@ -1,0 +1,15 @@
+// Use this file as a starting point for your project's .eslintrc.
+// Add rule overrides as needed
+{
+	"extends": "airbnb/base",
+	"env": {
+		"browser": true,
+		"node": false,
+		"amd": false,
+		"mocha": false,
+		"jasmine": false
+	},
+	"rules": {
+		"indent": [2, "tab"]
+	}
+}

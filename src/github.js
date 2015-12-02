@@ -80,7 +80,7 @@
 				var promise;
 				var _fetch = function () {
 					return fetch(API_ENDPOINT + url).then(function (res) {
-						if (res.status != API_STATUS_OK) {
+						if (res.status !== API_STATUS_OK) {
 							throw 'Error: ' + res.status;
 						}
 
@@ -114,7 +114,7 @@
 
 				if (gist && gist.description === desc && Object.keys(gist.files).length === Object.keys(files).length) {
 					var changed = Object.keys(gist.files).filter(function (name) {
-						return !files[name] || files[name].content != gist.files[name].content;
+						return !files[name] || files[name].content !== gist.files[name].content;
 					});
 
 					if (!changed.length) {

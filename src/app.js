@@ -53,7 +53,7 @@
 		snippets: [],
 
 		hasChanges: function () {
-			return JSON.stringify(this._latestData) != JSON.stringify(this.toJSON())
+			return JSON.stringify(this._latestData) !== JSON.stringify(this.toJSON());
 		},
 
 		didMount: function () {
@@ -157,7 +157,7 @@
 						while (matches = R_CONFIG.exec(gist.files['suite.js'].content)) {
 							attrs[matches[1]] = {
 								code: matches[2].replace(/\n\t\t/g, '\n').trim() + '\n'
-							}
+							};
 						}
 
 						while (matches = R_SNIPPET.exec(gist.files['suite.js'].content)) {
@@ -330,7 +330,7 @@
 			suite
 				.on('cycle', function (evt) {
 					var stat = evt.target;
-					var el = refs['stats-' + stat.name];
+					//var el = refs['stats-' + stat.name];
 
 					!suite.aborted && (refs['stats-' + stat.name].innerHTML = toStringBench(stat));
 				})
@@ -453,18 +453,19 @@
 					var save = function (gist) {
 						var isNew = !gist.id;
 
-						return github.gist.save(gist.id, desc + (isNew ? ' ' : ' (' + location.toString() + ') ')  + GIST_TAGS, files).then(function (gist) {
-							_this.set('gist', gist); // (1)
-							location.hash = gist.id; // (2)
+						return github.gist.save(gist.id, desc + (isNew ? ' ' : ' (' + location.toString() + ') ') /
+								+ GIST_TAGS, files).then(function (gist) {
+									_this.set('gist', gist); // (1)
+									location.hash = gist.id; // (2)
 
-							swal('Saved', gist.html_url, 'success');
+									swal('Saved', gist.html_url, 'success');
 
-							if (isNew) {
-								github.gist.save(gist.id, desc + ' (' + location.toString() + ') ' + GIST_TAGS);
-								_this.addStat(_this._latestUnsavedResults);
-							}
+									if (isNew) {
+										github.gist.save(gist.id, desc + ' (' + location.toString() + ') ' + GIST_TAGS);
+										_this.addStat(_this._latestUnsavedResults);
+									}
 
-							return gist;
+									return gist;
 						});
 					};
 
@@ -473,7 +474,7 @@
 					_this.set('user', user);
 
 					// А теперь решим, fork или save
-					return (gist.id && gist.owner.id != user.id) ? github.gist.fork(gist.id).then(save) : save(gist);
+					return (gist.id && gist.owner.id !== user.id) ? github.gist.fork(gist.id).then(save) : save(gist);
 				})
 					['catch'](showError).then(function () {
 						_this._latestData = _this.toJSON();
@@ -536,7 +537,8 @@
 	}
 
 	function getName(snippet) {
-		return (snippet.code !== void 0 ? snippet.code : snippet).trim().split('\n')[0].replace(/(^\/[*/]+|\**\/$)/g, '').trim();
+		return (snippet.code !== void 0 ? snippet.code : snippet).trim()
+				.split('\n')[0].replace(/(^\/[*/]+|\**\/$)/g, '').trim();
 	}
 
 	function toStringBench(bench) {
@@ -551,7 +553,7 @@
 			return (
 				formatNumber(hz.toFixed(hz < 100 ? 2 : 0)) + ' ops/sec<br/>' +
 				'\xb1' + stats.rme.toFixed(2) + '%<br/>' +
-				'(' + size + ' run' + (size == 1 ? '' : 's') + ' sampled)'
+				'(' + size + ' run' + (size === 1 ? '' : 's') + ' sampled)'
 			);
 		}
 	}
