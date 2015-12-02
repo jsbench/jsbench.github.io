@@ -1,15 +1,54 @@
 // Use this file as a starting point for your project's .eslintrc.
 // Add rule overrides as needed
 {
-	"extends": "airbnb/base",
+	"extends": "eslint:recommended",
+
 	"env": {
 		"browser": true,
-		"node": false,
-		"amd": false,
-		"mocha": false,
-		"jasmine": false
+		"es6": true
 	},
+
+	"globals": {
+		"github": true,
+		"UIChart": true,
+		"dataURLtoBlob": true,
+		"Firebase": true
+	},
+
 	"rules": {
-		"indent": [2, "tab"]
+		"indent": [2, "tab", {"SwitchCase": 0, "VariableDeclarator": 1}],
+		"no-console": 0,
+		"no-mixed-spaces-and-tabs": [2, "smart-tabs"],
+		"no-void": 2,
+		"no-with": 2,
+		"vars-on-top": 1,
+		"wrap-iife": [2, "inside"],
+		"spaced-comment": [2, "always"],
+		"space-unary-ops": [2, { "words": true, "nonwords": false }],
+		"space-return-throw-case": 2,
+		"space-infix-ops": [2, {"int32Hint": false}],
+		"space-in-parens": [2, "never"],
+		"space-before-keywords": [2, "always"],
+		"space-before-function-paren": [2, { "anonymous": "always", "named": "never" }],
+		"space-before-blocks": 2,
+		"space-after-keywords": [2, "always"],
+		"valid-jsdoc": [2, {
+			"prefer": {
+				"return": "returns"
+			},
+			"requireReturn": false,
+			"requireReturnDescription": false
+		}],
+		"radix": [2, "as-needed"],
+		"quotes": [2, "single"],
+		"no-undefined": 1,
+		"no-floating-decimal": 2,
+		"guard-for-in": 2,
+		"default-case": 2,
+		"brace-style": [2, "1tbs", { "allowSingleLine": true }],
+		"no-nested-ternary": 2,
+		"no-empty": 0,
+		"no-cond-assign": [2, "except-parens"],
+		"comma-dangle": [2, "never"]
 	}
 }

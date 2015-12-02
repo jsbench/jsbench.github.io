@@ -1,7 +1,6 @@
 'use strict';
 
 import gulp   from 'gulp';
-import jshint from 'gulp-jshint';
 import eslint from 'gulp-eslint';
 
 // TODO: Will refactor in next Pull Requests
@@ -12,10 +11,10 @@ const DIRS = {
 
 gulp.task('lint', () => {
 	return gulp.src([DIRS.src])
-		.pipe(jshint())
-		.pipe(jshint.reporter('jshint-stylish'))
 		.pipe(eslint())
 		.pipe(eslint.format())
+	// Brick on failure to be super strict
+	  .pipe(eslint.failOnError());
 });
 
 gulp.task('default', ['lint'], function () {
