@@ -3,6 +3,8 @@
 
 	var SCREEN_WIDTH = screen.width;
 	var SCREEN_HEIGHT = screen.height;
+	var twttr = {};
+	var facebook = {};
 
 	function generateChartsAsBlob(app, width, height) {
 		return new Promise(function (resolve) {
@@ -30,14 +32,14 @@
 		});
 	}
 
-	var twttr = {
+	twttr = {
 		url: 'https://twitter.com/intent/tweet?text=',
 		length: 140,
 		width: 550,
 		height: 250
 	};
 
-	var facebook = {
+	facebook = {
 		id: '900218293360254',
 		publishUrl: 'https://graph.facebook.com/me/photos',
 		width: 1200,
@@ -61,12 +63,14 @@
 
 				(function (d, s, id) {
 					var js, fjs = d.getElementsByTagName(s)[0];
-					if (d.getElementById(id)) {return;}
+					if (d.getElementById(id)) {
+						return;
+					}
 					js = d.createElement(s);
 					js.id = id;
 					js.src = '//connect.facebook.net/en_US/sdk.js';
 					fjs.parentNode.insertBefore(js, fjs);
-				}(document, 'script', 'facebook-jssdk'));
+				})(document, 'script', 'facebook-jssdk');
 			}));
 		},
 

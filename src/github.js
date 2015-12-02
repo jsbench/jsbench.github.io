@@ -90,14 +90,12 @@
 
 				if (_gists[id]) { // Cache
 					promise = Promise.resolve(_gists[id]);
-				}
-				else if (github.currentUser) {
+				} else if (github.currentUser) {
 					promise = _call('get', url)['catch'](function () {
 						github.setUser(null);
 						return _fetch();
 					});
-				}
-				else {
+				} else {
 					promise = _fetch()['catch'](function () {
 						return _call('get', url);
 					});
@@ -111,9 +109,10 @@
 
 			save: function (id, desc, files) {
 				var gist = _gists[id];
+				var changed;
 
 				if (gist && gist.description === desc && Object.keys(gist.files).length === Object.keys(files).length) {
-					var changed = Object.keys(gist.files).filter(function (name) {
+					changed = Object.keys(gist.files).filter(function (name) {
 						return !files[name] || files[name].content !== gist.files[name].content;
 					});
 
@@ -145,9 +144,9 @@
 			},
 
 			checkStar: function (id) {
-				if (_stars[id] === void 0) {
+				if (_stars[id] === undefined) {
 					return _call('get', 'gists/' + id + '/star')
-						.then(function () {_stars[id] = true;}, function () {_stars[id] = false;})
+						.then(function () { _stars[id] = true; }, function () { _stars[id] = false; })
 						.then(function () {
 							_store(STORE_STARS_KEY, _stars);
 							return _stars[id];
