@@ -103,7 +103,6 @@
 			var _this = this;
 			var attrs = _this.attrs;
 			var hash = location.hash.substr(1);
-			var jsonStr = '';
 
 			try {
 				hash = decodeURIComponent(hash);
@@ -215,6 +214,8 @@
 
 					// Cохраняем в `hash` и `localStorage` раз в 1sec
 					_this._saveId = setInterval(function () {
+						var jsonStr = '';
+
 						if (!attrs.gist.id) {
 							jsonStr = JSON.stringify(_this.toJSON());
 
@@ -316,7 +317,6 @@
 			var attrs = _this.attrs;
 			var suite = new Benchmark.Suite;
 			var index = {};
-			var results;
 
 			this.snippets.forEach(function (snippet) {
 				snippet.status = '';
@@ -340,6 +340,8 @@
 					!suite.aborted && (refs['stats-' + stat.name].innerHTML = toStringBench(stat));
 				})
 				.on('complete', function (evt) {
+					var results;
+
 					if (!suite.aborted) {
 						results = evt.currentTarget;
 
