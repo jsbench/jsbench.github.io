@@ -154,13 +154,13 @@
 						var R_SNIPPET = /\tsuite.add.*?\{\n([\s\S]+?)\n\t\}\);/g;
 						var matches;
 
-						while (matches = R_CONFIG.exec(gist.files['suite.js'].content)) {
+						while ((matches = R_CONFIG.exec(gist.files['suite.js'].content))) {
 							attrs[matches[1]] = {
 								code: matches[2].replace(/\n\t\t/g, '\n').trim() + '\n'
 							};
 						}
 
-						while (matches = R_SNIPPET.exec(gist.files['suite.js'].content)) {
+						while ((matches = R_SNIPPET.exec(gist.files['suite.js'].content))) {
 							_this.snippets.push(newSnippet(matches[1].replace(/\n\t\t/g, '\n').trim() + '\n'));
 						}
 
@@ -214,14 +214,16 @@
 
 					// Cохраняем в `hash` и `localStorage` раз в 1sec
 					_this._saveId = setInterval(function () {
+						var jsonStr = '';
+
 						if (!attrs.gist.id) {
-							var jsonStr = JSON.stringify(_this.toJSON());
+							jsonStr = JSON.stringify(_this.toJSON());
 
 							if (_this._prevJSONStr !== jsonStr) {
 								_this._prevJSONStr = jsonStr;
 
 								try {
-									//location.hash = encodeURIComponent(jsonStr);
+									// location.hash = encodeURIComponent(jsonStr);
 									localStorage.setItem(STORE_SNIPPETS_KEY, jsonStr);
 								} catch (err) {}
 							}
@@ -248,7 +250,7 @@
 					stat[0] = data.name + ' (' + stat.count + ')';
 
 					for (var i = 0, n = data.hz.length; i < n; i++) {
-						stat[i + 1] = (data.hz[i] + stat[i + 1])/2;
+						stat[i + 1] = (data.hz[i] + stat[i + 1]) / 2;
 					}
 				}
 			});
@@ -265,9 +267,12 @@
 		},
 
 		addStat: function (stat) {
+			var gist;
+			var data = {};
+
 			if (stat) {
-				var gist = this.attrs.gist;
-				var data = {
+				gist = this.attrs.gist;
+				data = {
 					name: Benchmark.platform.name + ' ' + Benchmark.platform.version,
 					hz: stat
 				};
@@ -330,13 +335,15 @@
 			suite
 				.on('cycle', function (evt) {
 					var stat = evt.target;
-					//var el = refs['stats-' + stat.name];
+					// var el = refs['stats-' + stat.name];
 
 					!suite.aborted && (refs['stats-' + stat.name].innerHTML = toStringBench(stat));
 				})
 				.on('complete', function (evt) {
+					var results;
+
 					if (!suite.aborted) {
-						var results = evt.currentTarget;
+						results = evt.currentTarget;
 
 						suite.filter('fastest').forEach(function (stat) {
 							index[stat.name].status = 'fastest';
@@ -381,18 +388,18 @@
 
 				// Setup
 				(!attrs.setup.code.trim() ? '' : [
-				'	Benchmark.prototype.setup = function () {',
-				'		' + attrs.setup.code.trim().split('\n').join('\n\t\t'),
-				'	};',
-				''
+					'	Benchmark.prototype.setup = function () {',
+					'		' + attrs.setup.code.trim().split('\n').join('\n\t\t'),
+					'	};',
+					''
 				].join('\n')),
 
 				// Teardown
 				(!attrs.teardown.code.trim() ? '' : [
-				'	Benchmark.prototype.teardown = function () {',
-				'		' + attrs.teardown.code.trim().split('\n').join('\n\t\t'),
-				'	};',
-				''
+					'	Benchmark.prototype.teardown = function () {',
+					'		' + attrs.teardown.code.trim().split('\n').join('\n\t\t'),
+					'	};',
+					''
 				].join('\n')),
 
 				// Snippets
@@ -453,8 +460,8 @@
 					var save = function (gist) {
 						var isNew = !gist.id;
 
-						return github.gist.save(gist.id, desc + (isNew ? ' ' : ' (' + location.toString() + ') ') /
-								+ GIST_TAGS, files).then(function (gist) {
+						return github.gist.save(gist.id, desc + (isNew ? ' ' : ' (' + location.toString() + ') ') +
+								GIST_TAGS, files).then(function (gist) {
 									_this.set('gist', gist); // (1)
 									location.hash = gist.id; // (2)
 
@@ -466,7 +473,7 @@
 									}
 
 									return gist;
-						});
+								});
 					};
 
 					// Обновляем текущего юзера
@@ -537,7 +544,7 @@
 	}
 
 	function getName(snippet) {
-		return (snippet.code !== void 0 ? snippet.code : snippet).trim()
+		return (snippet.code !== undefined ? snippet.code : snippet).trim()
 				.split('\n')[0].replace(/(^\/[*/]+|\**\/$)/g, '').trim();
 	}
 
