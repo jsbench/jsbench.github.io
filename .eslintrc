@@ -15,7 +15,20 @@
 		"Firebase": true
 	},
 
+	"ecmaFeatures": {
+		"arrowFunctions": true,
+		"blockBindings": true,
+		"classes": true,
+		"defaultParams": true,
+		"destructuring": true,
+		"modules": true,
+		"spread": true,
+		"superInFunctions": true,
+		"templateStrings": true
+	},
+
 	"rules": {
+		"func-names": 2,
 		"indent": [2, "tab", {"SwitchCase": 0, "VariableDeclarator": 1}],
 		"no-console": 0,
 		"no-mixed-spaces-and-tabs": [2, "smart-tabs"],
@@ -49,6 +62,16 @@
 		"no-nested-ternary": 2,
 		"no-empty": 0,
 		"no-cond-assign": [2, "except-parens"],
-		"comma-dangle": [2, "never"]
+		"comma-dangle": [2, "never"],
+
+		"arrow-spacing": 2,
+		"arrow-parens": [2, "always"],
+		"arrow-body-style": [2, "always"],
+		"one-var": [2, "never"],
+		"constructor-super": 2,
+		"no-this-before-super": 2,
+		"no-var": 2,
+		"prefer-arrow-callback": 2,
+		"prefer-const": 2
 	}
 }

@@ -1,4 +1,4 @@
-(function (feast) {
+export default (function btn(feast) {
 	'use strict';
 
 	/**

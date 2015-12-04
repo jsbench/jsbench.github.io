@@ -1,21 +1,21 @@
-(function (OAuth, swal) {
+export default (function github(OAuth, swal) {
 	'use strict';
 
-	var API_ENDPOINT  = 'https://api.github.com/';
-	var API_STATUS_OK = 200;
+	const API_ENDPOINT  = 'https://api.github.com/';
+	const API_STATUS_OK = 200;
 
-	var STORE_USER_KEY = 'jsbench-gihub-user';
-	var STORE_STARS_KEY = 'jsbench-gihub-stars';
+	const STORE_USER_KEY = 'jsbench-gihub-user';
+	const STORE_STARS_KEY = 'jsbench-gihub-stars';
 
-	var _api;
-	var _user;
-	var _gists = {};
-	var _stars = {};
+	let _api;
+	let _user;
+	let _stars = {};
+	const _gists = {};
 
 	function _getApi() {
 		if (!_api) {
-			_api = new Promise(function (resolve, reject) {
-				OAuth.popup('github', {cache: true}).done(resolve).fail(function (err) {
+			_api = new Promise((resolve, reject) => {
+				OAuth.popup('github', {cache: true}).done(resolve).fail((err) => {
 					if (err.toString().indexOf('popup')) {
 						swal({
 							title: 'Oops, required authorization!',
@@ -24,7 +24,7 @@
 							confirmButtonColor: '#A5DC86',
 							confirmButtonText: 'Sign in with GitHub',
 							cancelButtonText: 'Cancel'
-						}, function (isConfirm) {
+						}, (isConfirm) => {
 							if (isConfirm) {
 								OAuth.popup('github', {cache: true}).done(resolve).fail(reject);
 							} else {
@@ -42,7 +42,7 @@
 	}
 
 	function _call(type, method, data) {
-		return _getApi().then(function (api) {
+		return _getApi().then((api) => {
 			return api[type](method, {data: JSON.stringify(data)});
 		});
 	}
@@ -62,24 +62,24 @@
 	window.github = {
 		currentUser: null,
 
-		setUser: function (user) {
+		setUser: function setUser(user) {
 			this.currentUser = user;
 			_store(STORE_USER_KEY, user);
 		},
 
-		user: function (login) {
-			return _user || _call('get', 'user' + (login ? '/' + login : '')).then(function (user) {
+		user: function user(login) {
+			return _user || _call('get', 'user' + (login ? '/' + login : '')).then((user) => {
 				!login && github.setUser(user);
 				return user;
 			});
 		},
 
 		gist: {
-			findOne: function (id) {
-				var url = 'gists/' + id;
-				var promise;
-				var _fetch = function () {
-					return fetch(API_ENDPOINT + url).then(function (res) {
+			findOne: function findOne(id) {
+				let promise;
+				const url = 'gists/' + id;
+				const _fetch = function _fetch() {
+					return fetch(API_ENDPOINT + url).then((res) => {
 						if (res.status !== API_STATUS_OK) {
 							throw 'Error: ' + res.status;
 						}
@@ -91,28 +91,28 @@
 				if (_gists[id]) { // Cache
 					promise = Promise.resolve(_gists[id]);
 				} else if (github.currentUser) {
-					promise = _call('get', url)['catch'](function () {
+					promise = _call('get', url)['catch'](() => {
 						github.setUser(null);
 						return _fetch();
 					});
 				} else {
-					promise = _fetch()['catch'](function () {
+					promise = _fetch()['catch'](() => {
 						return _call('get', url);
 					});
 				}
 
-				return promise.then(function (gist) {
+				return promise.then((gist) => {
 					_gists[gist.id] = gist;
 					return gist;
 				});
 			},
 
-			save: function (id, desc, files) {
-				var gist = _gists[id];
-				var changed;
+			save: function save(id, desc, files) {
+				const gist = _gists[id];
+				let changed;
 
 				if (gist && gist.description === desc && Object.keys(gist.files).length === Object.keys(files).length) {
-					changed = Object.keys(gist.files).filter(function (name) {
+					changed = Object.keys(gist.files).filter((name) => {
 						return !files[name] || files[name].content !== gist.files[name].content;
 					});
 
@@ -125,29 +125,29 @@
 					'public': true,
 					'description': desc,
 					'files': files
-				}).then(function (gist) {
+				}).then((gist) => {
 					_gists[gist.id] = gist;
 					return gist;
 				});
 			},
 
-			fork: function (id) {
+			fork: function fork(id) {
 				return _call('post', 'gists/' + id + '/fork');
 			},
 
-			star: function (id, state) {
-				return _call(state ? 'put' : 'del', 'gists/' + id + '/star').then(function () {
+			star: function star(id, state) {
+				return _call(state ? 'put' : 'del', 'gists/' + id + '/star').then(() => {
 					_stars[id] = state;
 					_store(STORE_STARS_KEY, _stars);
 					return state;
 				});
 			},
 
-			checkStar: function (id) {
-				if (_stars[id] === undefined) {
+			checkStar: function checkStar(id) {
+				if (typeof _stars[id] === 'undefined') {
 					return _call('get', 'gists/' + id + '/star')
-						.then(function () { _stars[id] = true; }, function () { _stars[id] = false; })
-						.then(function () {
+						.then(() => { _stars[id] = true; }, () => { _stars[id] = false; })
+						.then(() => {
 							_store(STORE_STARS_KEY, _stars);
 							return _stars[id];
 						})
@@ -160,5 +160,5 @@
 	};
 
 	_stars = _store(STORE_STARS_KEY) || {};
-	github.setUser(_store(STORE_USER_KEY));
+	window.github.setUser(_store(STORE_USER_KEY));
 })(window.OAuth, window.sweetAlert);

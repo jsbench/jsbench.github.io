@@ -1,15 +1,15 @@
-(function (fetch) {
+export default (function share(fetch) {
 	'use strict';
 
-	var SCREEN_WIDTH = screen.width;
-	var SCREEN_HEIGHT = screen.height;
-	var twttr = {};
-	var facebook = {};
+	const SCREEN_WIDTH = screen.width;
+	const SCREEN_HEIGHT = screen.height;
+	let twttr = {};
+	let facebook = {};
 
 	function generateChartsAsBlob(app, width, height) {
-		return new Promise(function (resolve) {
-			var el = document.createElement('div');
-			var chart = new UIChart({
+		return new Promise((resolve) => {
+			const el = document.createElement('div');
+			const chart = new UIChart({
 				data: app.get('results'),
 				mode: 'fit'
 			});
@@ -18,8 +18,8 @@
 			el.style.width = width + 'px';
 			el.style.height = height + 'px';
 
-			chart.on('ready', function () {
-				var dataURI = chart.toDataURI();
+			chart.on('ready', () => {
+				const dataURI = chart.toDataURI();
 
 				chart.destroy();
 				document.body.removeChild(el);
@@ -45,10 +45,10 @@
 		width: 1200,
 		height: 630,
 
-		init: function () {
-			return this._promiseInit || (this._promiseInit = new Promise(function (resolve) {
-				window.fbAsyncInit = function () {
-					var FB = window.FB;
+		init: function init() {
+			return this._promiseInit || (this._promiseInit = new Promise((resolve) => {
+				window.fbAsyncInit = function fbAsyncInit() {
+					const FB = window.FB;
 
 					FB.init({
 						appId: facebook.id,
@@ -61,8 +61,9 @@
 					resolve(FB);
 				};
 
-				(function (d, s, id) {
-					var js, fjs = d.getElementsByTagName(s)[0];
+				(function loadFacebook(d, s, id) {
+					const fjs = d.getElementsByTagName(s)[0];
+					let js;
 					if (d.getElementById(id)) {
 						return;
 					}
@@ -74,10 +75,10 @@
 			}));
 		},
 
-		login: function () {
-			return this._promiseLogin || (this._promiseLogin = this.init().then(function (api) {
-				return new Promise(function (resolve, reject) {
-					api.login(function (response) {
+		login: function login() {
+			return this._promiseLogin || (this._promiseLogin = this.init().then((api) => {
+				return new Promise((resolve, reject) => {
+					api.login((response) => {
 						if (response.authResponse) {
 							facebook.token = response.authResponse.accessToken;
 							resolve();
@@ -94,24 +95,24 @@
 
 	// Export
 	window.share = {
-		twitter: function (desc, url, tags) {
-			var top = Math.max(Math.round((SCREEN_HEIGHT / 3) - (twttr.height / 2)), 0);
-			var left = Math.round((SCREEN_WIDTH / 2) - (twttr.width / 2));
-			var message = desc.substr(0, twttr.length - (url.length + tags.length + 5)) + ': ' + url + ' ' + tags;
-			var params = 'left=' + left + ',top=' + top + ',width=' + twttr.width + ',height=' + twttr.height;
-			var extras = ',personalbar=0,toolbar=0,scrollbars=1,resizable=1';
+		twitter: function twitter(desc, url, tags) {
+			const top = Math.max(Math.round((SCREEN_HEIGHT / 3) - (twttr.height / 2)), 0);
+			const left = Math.round((SCREEN_WIDTH / 2) - (twttr.width / 2));
+			const message = desc.substr(0, twttr.length - (url.length + tags.length + 5)) + ': ' + url + ' ' + tags;
+			const params = 'left=' + left + ',top=' + top + ',width=' + twttr.width + ',height=' + twttr.height;
+			const extras = ',personalbar=0,toolbar=0,scrollbars=1,resizable=1';
 
 			window.open(twttr.url + encodeURIComponent(message), '', params + extras);
 		},
 
-		facebook: function (desc, url, tags, app) {
+		facebook: function facebook(desc, url, tags, app) {
 			return Promise.all([
 				facebook.login(),
 				generateChartsAsBlob(app, facebook.width, facebook.height)
 			])
-				.then(function (results) {
-					var file = results[1];
-					var formData = new FormData();
+				.then((results) => {
+					const file = results[1];
+					const formData = new FormData();
 
 					formData.append('access_token', facebook.token);
 					formData.append('source', file);
@@ -121,11 +122,11 @@
 						method: 'post',
 						mode: 'cors',
 						body: formData
-					}).then(function (response) {
+					}).then((response) => {
 						if (response.status >= 200 && response.status < 300) {
 							return response;
 						} else {
-							return response.json().then(function (json) {
+							return response.json().then((json) => {
 								throw new Error(json.error.message);
 							});
 						}
@@ -133,7 +134,7 @@
 				});
 		},
 
-		init: function () {
+		init: function init() {
 			facebook.init();
 		}
 	};

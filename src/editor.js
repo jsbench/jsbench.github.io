@@ -1,4 +1,4 @@
-(function (feast, ace) {
+export default (function editor(feast, ace) {
 	'use strict';
 
 	/**
@@ -9,9 +9,9 @@
 		name: 'editor',
 		template: feast.parse('<div bem:mod="{attrs.mode}"/>'),
 
-		didMount: function () {
-			var _this = this;
-			var editor = _this.editor = ace.edit(_this.el);
+		didMount: function didMount() {
+			const _this = this;
+			const editor = _this.editor = ace.edit(_this.el);
 
 			editor.$blockScrolling = Number.POSITIVE_INFINITY;
 
@@ -20,7 +20,7 @@
 			editor.setOption('maxLines', _this.attrs['max-lines'] || 30);
 			editor.setOption('minLines', _this.attrs['min-lines'] || 4);
 
-			editor.on('change', function () {
+			editor.on('change', () => {
 				_this.attrs.data.code = editor.getValue();
 			});
 
@@ -28,7 +28,7 @@
 			editor.focus();
 		},
 
-		didUnmount: function () {
+		didUnmount: function didUnmount() {
 			this.editor.destroy();
 		}
 	});
