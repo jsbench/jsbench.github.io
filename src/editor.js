@@ -10,21 +10,20 @@ export default (function editor(feast, ace) {
 		template: feast.parse('<div bem:mod="{attrs.mode}"/>'),
 
 		didMount: function didMount() {
-			const _this = this;
-			const editor = _this.editor = ace.edit(_this.el);
+			const editor = this.editor = ace.edit(this.el);
 
 			editor.$blockScrolling = Number.POSITIVE_INFINITY;
 
 			editor.setTheme('ace/theme/tomorrow');
 			editor.getSession().setMode('ace/mode/javascript');
-			editor.setOption('maxLines', _this.attrs['max-lines'] || 30);
-			editor.setOption('minLines', _this.attrs['min-lines'] || 4);
+			editor.setOption('maxLines', this.attrs['max-lines'] || 30);
+			editor.setOption('minLines', this.attrs['min-lines'] || 4);
 
 			editor.on('change', () => {
-				_this.attrs.data.code = editor.getValue();
+				this.attrs.data.code = editor.getValue();
 			});
 
-			editor.setValue(_this.attrs.data.code || '', 1);
+			editor.setValue(this.attrs.data.code || '', 1);
 			editor.focus();
 		},
 

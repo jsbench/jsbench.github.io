@@ -54,7 +54,6 @@
 		}],
 		"radix": [2, "as-needed"],
 		"quotes": [2, "single"],
-		"no-undefined": 1,
 		"no-floating-decimal": 2,
 		"guard-for-in": 2,
 		"default-case": 2,

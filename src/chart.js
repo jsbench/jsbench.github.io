@@ -18,10 +18,10 @@ export default (function chart(feast, google) {
 		didMount: function didMount() {
 			google.load('visualization', '1', {
 				packages: ['corechart', 'bar'],
-				callback: function callback() {
+				callback: () => {
 					this.visualization = true;
 					this.redraw();
-				}.bind(this)
+				}
 			});
 		},
 
