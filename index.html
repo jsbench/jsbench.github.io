@@ -2,16 +2,15 @@
 <html manifest="app.cache.manifest">
 <head>
 	<meta charset="utf-8"/>
+	<title>JavaScript benchmark playground</title>
 	<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 	<meta name="viewport" content="width=device-width, initial-scale=1"/>
 
 	<meta name="description" content="JSBench — JavaScript benchmark playground. User-friendly interface, sync with your github, code highlighting and etc."/>
-	<meta property="og:image" content="/st/og-image.png"/>
+	<meta property="og:image" content="/st/images/og-image.png"/>
 
-	<link href="./st/favicon.ico" rel="icon" type="image/x-icon" />
+	<link href="./st/images/favicon.ico" rel="icon" type="image/x-icon"/>
 	<link href="./st/app.css" rel="stylesheet"/>
-
-	<title>JavaScript benchmark playground</title>
 </head>
 <body class="no-auth state-initialization">
 
@@ -88,25 +87,25 @@
 			<fn:if test="attrs.gist.id">
 				<div bem:elem="share">
 					<fn:for data="['facebook', 'twitter']" as="service">
-						<img remit:click="share" event:details="service" src="./st/{service}.svg"/>
+						<img remit:click="share" event:details="service" src="./st/images/{service}.svg"/>
 					</fn:for>
 				</div>
 			</fn:if>
 
 			<span>
 				<a class="github-button" href="https://github.com/jsbench/jsbench.github.io" data-style="mega"
-				   data-count-href="/jsbench/jsbench.github.io/stargazers"
-				   data-count-api="/repos/jsbench/jsbench.github.io#stargazers_count"
-				   data-count-aria-label="# stargazers on GitHub"
-				   aria-label="Star jsbench/jsbench.github.io on GitHub">Star</a>
+					 data-count-href="/jsbench/jsbench.github.io/stargazers"
+					 data-count-api="/repos/jsbench/jsbench.github.io#stargazers_count"
+					 data-count-aria-label="# stargazers on GitHub"
+					 aria-label="Star jsbench/jsbench.github.io on GitHub">Star</a>
 			</span>
 
 			<span>
 				<a class="github-button" href="https://github.com/jsbench/jsbench.github.io/issues"
-				   data-icon="octicon-issue-opened" data-style="mega"
-				   data-count-api="/repos/jsbench/jsbench.github.io#open_issues_count"
-				   data-count-aria-label="# issues on GitHub"
-				   aria-label="Issue jsbench/jsbench.github.io on GitHub">Issue</a>
+					 data-icon="octicon-issue-opened" data-style="mega"
+					 data-count-api="/repos/jsbench/jsbench.github.io#open_issues_count"
+					 data-count-aria-label="# issues on GitHub"
+					 aria-label="Issue jsbench/jsbench.github.io on GitHub">Issue</a>
 			</span>
 		</div>
 
@@ -140,23 +139,23 @@
 <script>
 	function include(src) { document.write('<script src="' + src + '"></' + 'script>'); }
 
-	[].forEach || include('https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.1.14/es5-shim.min.js');
-	window.Promise || include('https://cdnjs.cloudflare.com/ajax/libs/es6-promise/3.0.2/es6-promise.min.js');
-	window.fetch || include('https://cdnjs.cloudflare.com/ajax/libs/fetch/0.10.0/fetch.min.js');
+	[].forEach || include('//cdnjs.cloudflare.com/ajax/libs/es5-shim/4.1.14/es5-shim.min.js');
+	window.Promise || include('//cdnjs.cloudflare.com/ajax/libs/es6-promise/3.0.2/es6-promise.min.js');
+	window.fetch || include('//cdnjs.cloudflare.com/ajax/libs/fetch/0.10.0/fetch.min.js');
 	include('./vendor/canvas-to-blob.js');
 </script>
 
 <!-- Google jsapi -->
-<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<script src="//www.google.com/jsapi"></script>
 
 <!-- Ace -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.0/ace.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.0/mode-javascript.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.0/theme-tomorrow.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/ace/1.2.0/ace.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/ace/1.2.0/mode-javascript.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/ace/1.2.0/theme-tomorrow.js"></script>
 
 <!-- Platform + Benchmark -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/platform/1.3.0/platform.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/benchmark/1.0.0/benchmark.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/platform/1.3.0/platform.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/benchmark/1.0.0/benchmark.min.js"></script>
 
 <!-- OAuth.io -->
 <script src="./vendor/oauth.min.js"></script>
@@ -165,22 +164,17 @@
 <script src="./vendor/feast.min.js"></script>
 
 <!-- Sweet Alert -->
-<link href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.0/sweetalert.min.css" rel="stylesheet"/>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.0/sweetalert.min.js"></script>
+<link href="//cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.0/sweetalert.min.css" rel="stylesheet"/>
+<script src="//cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.0/sweetalert.min.js"></script>
 
 <!-- Firebase.io -->
-<script src="https://cdn.firebase.com/js/client/2.3.1/firebase.js"></script>
+<script src="//cdn.firebase.com/js/client/2.3.1/firebase.js"></script>
 
 <!-- Application -->
-<script src="src/btn.js"></script>
-<script src="src/github.js"></script>
-<script src="src/chart.js"></script>
-<script src="src/editor.js"></script>
-<script src="src/share.js"></script>
-<script src="src/app.js"></script>
+<script src="./jsbench.bundle.js"></script>
 
 <!-- Github Buttons -->
-<script async defer id="github-bjs" src="https://buttons.github.io/buttons.js"></script>
+<script async defer id="github-bjs" src="//buttons.github.io/buttons.js"></script>
 
 </body>
 </html>

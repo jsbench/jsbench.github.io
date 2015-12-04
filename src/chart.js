@@ -1,40 +1,40 @@
-(function (feast, google) {
+export default (function chart(feast, google) {
 	'use strict';
 
 	/**
 	 * @class UIChart
 	 * @extends feast.Block
 	 */
-	var UIChart = feast.Block.extend(/** @lends UIChart# */{
+	const UIChart = feast.Block.extend(/** @lends UIChart# */{
 		name: 'chart',
 		template: feast.parse('<div/>'),
 
 		attrChanged: {
-			'data': function () {
+			'data': function data() {
 				this.visualization && this.redraw();
 			}
 		},
 
-		didMount: function () {
+		didMount: function didMount() {
 			google.load('visualization', '1', {
 				packages: ['corechart', 'bar'],
-				callback: function () {
+				callback: function callback() {
 					this.visualization = true;
 					this.redraw();
 				}.bind(this)
 			});
 		},
 
-		redraw: function () {
-			var data = this.attrs.data;
+		redraw: function redraw() {
+			const data = this.attrs.data;
 
 			if (google.visualization && data) {
 				if (!this.chart) {
 					this.chart = new google.visualization.BarChart(this.el);
 
-					google.visualization.events.addListener(this.chart, 'ready', function () {
+					google.visualization.events.addListener(this.chart, 'ready', () => {
 						this.broadcast('ready');
-					}.bind(this));
+					});
 				}
 
 				this.chart.draw(
@@ -63,7 +63,7 @@
 			}
 		},
 
-		toDataURI: function () {
+		toDataURI: function toDataURI() {
 			return this.chart.getImageURI();
 		}
 	});

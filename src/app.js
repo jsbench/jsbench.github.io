@@ -1,21 +1,21 @@
-(function (feast, Benchmark, OAuth, github, share, swal) {
+export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 	'use strict';
 
-	var gid = 1;
+	let gid = 1;
 
-	var GIST_TAGS = '#jsbench #jsperf';
-	var STORE_SNIPPETS_KEY = 'jsbench-snippets';
+	const GIST_TAGS = '#jsbench #jsperf';
+	const STORE_SNIPPETS_KEY = 'jsbench-snippets';
 
-	var OAUTH_PUBLIC_KEY = 'PL76R8FlKhIm2_j4NELvcpRFErg';
-	var FIREBASE_ENDPOINT = 'https://jsbench.firebaseio.com/';
+	const OAUTH_PUBLIC_KEY = 'PL76R8FlKhIm2_j4NELvcpRFErg';
+	const FIREBASE_ENDPOINT = 'https://jsbench.firebaseio.com/';
 
-	var firebase = new Firebase(FIREBASE_ENDPOINT);
+	const firebase = new Firebase(FIREBASE_ENDPOINT);
 
 	/**
 	 * @class UIApp
 	 * @extends feast.Block
 	 */
-	var UIApp = feast.Block.extend(/** @lends UIApp# */{
+	const UIApp = feast.Block.extend(/** @lends UIApp# */{
 		name: 'app',
 		template: feast.parse(document.getElementById('app-template').textContent),
 
@@ -41,7 +41,7 @@
 		},
 
 		attrChanged: {
-			desc: function (desc) {
+			desc: function desc(desc) {
 				document.title = (desc ? desc + ' :: ' : '') + document.title.split('::').pop().trim();
 			}
 		},
@@ -52,23 +52,23 @@
 
 		snippets: [],
 
-		hasChanges: function () {
+		hasChanges: function hasChanges() {
 			return JSON.stringify(this._latestData) !== JSON.stringify(this.toJSON());
 		},
 
-		didMount: function () {
-			var _this = this;
+		didMount: function didMount() {
+			const _this = this;
 
 			// Предупреждалка
-			window.onbeforeunload = function () {
+			window.onbeforeunload = function onbeforeunload() {
 				if (!_this.attrs.gist.id && _this.hasChanges() || _this._latestUnsavedResults) {
 					return 'Your changes and test results have not been saved!';
 				}
 			};
 
 			// Роутинг
-			window.onhashchange = function () {
-				new Promise(function (resolve, reject) {
+			window.onhashchange = function onhashchange() {
+				new Promise((resolve, reject) => {
 					if (_this.attrs.running) {
 						swal({
 							title: 'Are you sure?',
@@ -77,7 +77,7 @@
 							confirmButtonColor: '#A5DC86',
 							confirmButtonText: 'Continue',
 							cancelButtonText: 'Abort'
-						}, function (isConfirm) {
+						}, (isConfirm) => {
 							if (!isConfirm) {
 								_this._suite.abort();
 								resolve();
@@ -88,21 +88,21 @@
 					} else {
 						resolve();
 					}
-				}).then(function () {
+				}).then(() => {
 					_this.routing();
 				});
 			};
 
-			this.routing().then(function () {
+			this.routing().then(() => {
 				document.body.className = document.body.className.replace('state-initialization', 'state-ready');
 				share.init();
 			});
 		},
 
-		routing: function () {
-			var _this = this;
-			var attrs = _this.attrs;
-			var hash = location.hash.substr(1);
+		routing: function routing() {
+			const _this = this;
+			const attrs = _this.attrs;
+			let hash = location.hash.substr(1);
 
 			try {
 				hash = decodeURIComponent(hash);
@@ -132,27 +132,27 @@
 			clearInterval(_this._saveId);
 
 			// Чистим статус
-			Object.keys(_this.refs).forEach(function (name) {
+			Object.keys(_this.refs).forEach((name) => {
 				/^stat/.test(name) && (_this.refs[name].innerHTML = '');
 			});
 
-			return new Promise(function (resolve) {
-				var restoredData;
+			return new Promise((resolve) => {
+				let restoredData;
 
 				// Gist ID
 				if (/^[a-z0-9]+$/.test(hash)) {
 					if (github.currentUser) {
 						_this.set('user', github.currentUser);
 
-						github.gist.checkStar(hash).then(function (state) {
+						github.gist.checkStar(hash).then((state) => {
 							_this.set('starred', state);
 						});
 					}
 
-					github.gist.findOne(hash).then(function (gist) {
-						var R_CONFIG = /\tBenchmark\.prototype\.(setup|teardown)\s*=.*?\{([\s\S]+?)\n\t};/g;
-						var R_SNIPPET = /\tsuite.add.*?\{\n([\s\S]+?)\n\t\}\);/g;
-						var matches;
+					github.gist.findOne(hash).then((gist) => {
+						const R_CONFIG = /\tBenchmark\.prototype\.(setup|teardown)\s*=.*?\{([\s\S]+?)\n\t};/g;
+						const R_SNIPPET = /\tsuite.add.*?\{\n([\s\S]+?)\n\t\}\);/g;
+						let matches;
 
 						while ((matches = R_CONFIG.exec(gist.files['suite.js'].content))) {
 							attrs[matches[1]] = {
@@ -169,10 +169,10 @@
 							'gist': gist
 						});
 
-						firebase.child('stats').child(gist.id).child(getGistLastRevisionId(gist)).on('value', function (snapshot) {
-							var values = snapshot.val();
+						firebase.child('stats').child(gist.id).child(getGistLastRevisionId(gist)).on('value', (snapshot) => {
+							const values = snapshot.val();
 
-							values && _this.setStats(Object.keys(values).map(function (key) {
+							values && _this.setStats(Object.keys(values).map((key) => {
 								return values[key];
 							}));
 						});
@@ -194,7 +194,7 @@
 						attrs.desc = restoredData.desc;
 						attrs.setup = restoredData.setup || {code: ''};
 						attrs.teardown = restoredData.teardown || {code: ''};
-						_this.snippets = restoredData.snippets.map(function (code) {
+						_this.snippets = restoredData.snippets.map((code) => {
 							return newSnippet(code);
 						});
 					} catch (err) {}
@@ -203,7 +203,7 @@
 				}
 			})
 				['catch'](showError)
-				.then(function () {
+				.then(() => {
 					if (!Array.isArray(_this.snippets) || !_this.snippets.length) {
 						_this.snippets = [newSnippet()];
 					}
@@ -213,8 +213,8 @@
 					_this._prevJSONStr = JSON.stringify(_this.toJSON());
 
 					// Cохраняем в `hash` и `localStorage` раз в 1sec
-					_this._saveId = setInterval(function () {
-						var jsonStr = '';
+					_this._saveId = setInterval(() => {
+						let jsonStr = '';
 
 						if (!attrs.gist.id) {
 							jsonStr = JSON.stringify(_this.toJSON());
@@ -234,13 +234,13 @@
 				});
 		},
 
-		setStats: function (values) {
-			var stats = {};
+		setStats: function setStats(values) {
+			const stats = {};
 
 			this._stats = values;
 
-			values.forEach(function (data) {
-				var stat = stats[data.name];
+			values.forEach((data) => {
+				let stat = stats[data.name];
 
 				if (!stat) {
 					stats[data.name] = stat = [data.name].concat(data.hz);
@@ -249,26 +249,26 @@
 					stat.count++;
 					stat[0] = data.name + ' (' + stat.count + ')';
 
-					for (var i = 0, n = data.hz.length; i < n; i++) {
+					for (let i = 0, n = data.hz.length; i < n; i++) {
 						stat[i + 1] = (data.hz[i] + stat[i + 1]) / 2;
 					}
 				}
 			});
 
 			this.set('results', {
-				names: this.snippets.map(function (snippet, idx) {
+				names: this.snippets.map((snippet, idx) => {
 					return '#' + (idx + 1) + ': ' + getName(snippet);
 				}),
 
-				series: Object.keys(stats).map(function (name) {
+				series: Object.keys(stats).map((name) => {
 					return stats[name];
 				})
 			});
 		},
 
-		addStat: function (stat) {
-			var gist;
-			var data = {};
+		addStat: function addStat(stat) {
+			let gist;
+			let data = {};
 
 			if (stat) {
 				gist = this.attrs.gist;
@@ -288,37 +288,37 @@
 			}
 		},
 
-		toJSON: function () {
-			var attrs = this.attrs;
+		toJSON: function toJSON() {
+			const attrs = this.attrs;
 
 			return {
 				desc: attrs.desc,
 				setup: {code: attrs.setup.code},
 				teardown: {code: attrs.teardown.code},
-				snippets: this.snippets.map(function (snippet) {
+				snippets: this.snippets.map((snippet) => {
 					return snippet.code;
 				})
 			};
 		},
 
-		handleSuiteAdd: function () {
+		handleSuiteAdd: function handleSuiteAdd() {
 			this.snippets.push(newSnippet());
 			this.render();
 		},
 
-		handleSuiteRemove: function (evt) {
+		handleSuiteRemove: function handleSuiteRemove(evt) {
 			this.snippets.splice(this.snippets.indexOf(evt.details), 1);
 			this.render();
 		},
 
-		handleSuiteRun: function () {
-			var refs = this.refs;
-			var _this = this;
-			var attrs = _this.attrs;
-			var suite = new Benchmark.Suite;
-			var index = {};
+		handleSuiteRun: function handleSuiteRun() {
+			const refs = this.refs;
+			const _this = this;
+			const attrs = _this.attrs;
+			const suite = new Benchmark.Suite;
+			const index = {};
 
-			this.snippets.forEach(function (snippet) {
+			this.snippets.forEach((snippet) => {
 				snippet.status = '';
 				index[snippet.id] = snippet;
 
@@ -326,34 +326,34 @@
 					fn: snippet.code.trim(),
 					setup: attrs.setup.code,
 					teardown: attrs.teardown.code,
-					onCycle: function (evt) {
+					onCycle: function onCycle(evt) {
 						refs['stats-' + snippet.id].innerHTML = toStringBench(evt.target);
 					}
 				});
 			});
 
 			suite
-				.on('cycle', function (evt) {
-					var stat = evt.target;
-					// var el = refs['stats-' + stat.name];
+				.on('cycle', (evt) => {
+					const stat = evt.target;
+					// const el = refs['stats-' + stat.name];
 
 					!suite.aborted && (refs['stats-' + stat.name].innerHTML = toStringBench(stat));
 				})
-				.on('complete', function (evt) {
-					var results;
+				.on('complete', (evt) => {
+					let results;
 
 					if (!suite.aborted) {
 						results = evt.currentTarget;
 
-						suite.filter('fastest').forEach(function (stat) {
+						suite.filter('fastest').forEach((stat) => {
 							index[stat.name].status = 'fastest';
 						});
 
-						suite.filter('slowest').forEach(function (stat) {
+						suite.filter('slowest').forEach((stat) => {
 							index[stat.name].status = 'slowest';
 						});
 
-						_this.addStat(results.map(function (bench) {
+						_this.addStat(results.map((bench) => {
 							return bench.hz;
 						}));
 
@@ -368,12 +368,12 @@
 			_this._suite = suite;
 		},
 
-		handleSuiteSave: function () {
-			var _this = this;
-			var attrs = _this.attrs;
-			var gist = attrs.gist;
-			var desc = (attrs.desc || 'Untitled benchmark');
-			var suiteCode = [
+		handleSuiteSave: function handleSuiteSave() {
+			const _this = this;
+			const attrs = _this.attrs;
+			const gist = attrs.gist;
+			const desc = (attrs.desc || 'Untitled benchmark');
+			const suiteCode = [
 				'"use strict";',
 				'',
 				'(function (factory) {',
@@ -383,7 +383,7 @@
 				'		factory(require("benchmark"));',
 				'	}',
 				'})(function (Benchmark) {',
-				'	var suite = new Benchmark.Suite;',
+				'	let suite = new Benchmark.Suite;',
 				'',
 
 				// Setup
@@ -403,7 +403,7 @@
 				].join('\n')),
 
 				// Snippets
-				_this.snippets.map(function (snippet) {
+				_this.snippets.map((snippet) => {
 					return [
 						'	suite.add(' + JSON.stringify(getName(snippet)) + ', function () {',
 						'		' + (snippet.code || '').trim().split('\n').join('\n\t\t'),
@@ -416,7 +416,7 @@
 				'	});',
 				'',
 				'	suite.on("complete", function (evt) {',
-				'		var results = evt.currentTarget.sort(function (a, b) {',
+				'		let results = evt.currentTarget.sort(function (a, b) {',
 				'			return b.hz - a.hz;',
 				'		});',
 				'',
@@ -432,7 +432,7 @@
 				''
 			].join('\n');
 
-			var files = {
+			const files = {
 				'suite.js': {content: suiteCode},
 				'index.html': {content: [
 					'<!DOCTYPE html>',
@@ -456,12 +456,12 @@
 
 			// Запросим пользователя, чтобы быть 100% уверенными в актуальности данных
 			github.user()
-				.then(function (user) {
-					var save = function (gist) {
-						var isNew = !gist.id;
+				.then((user) => {
+					const save = function save(gist) {
+						const isNew = !gist.id;
 
 						return github.gist.save(gist.id, desc + (isNew ? ' ' : ' (' + location.toString() + ') ') +
-								GIST_TAGS, files).then(function (gist) {
+								GIST_TAGS, files).then((gist) => {
 									_this.set('gist', gist); // (1)
 									location.hash = gist.id; // (2)
 
@@ -483,33 +483,33 @@
 					// А теперь решим, fork или save
 					return (gist.id && gist.owner.id !== user.id) ? github.gist.fork(gist.id).then(save) : save(gist);
 				})
-					['catch'](showError).then(function () {
+					['catch'](showError).then(() => {
 						_this._latestData = _this.toJSON();
 						_this.set('saving', false);
 					});
 		},
 
-		handleStar: function () {
+		handleStar: function handleStar() {
 			this.invert('starred');
 			github.gist.star(this.attrs.gist.id, this.attrs.starred);
 		},
 
-		handleConfigure: function (evt) {
+		handleConfigure: function handleConfigure(evt) {
 			evt.details.visible = !evt.details.visible;
 			this.render();
 		},
 
-		handleScrollTo: function () {
+		handleScrollTo: function handleScrollTo() {
 			this.refs.scrollTo.style.display = 'none';
 			this.refs.chart.scrollIntoView();
 		},
 
-		handleShare: function (evt) {
-			var service = evt.details;
+		handleShare: function handleShare(evt) {
+			const service = evt.details;
 
 			Promise.resolve(
 				share[service](this.attrs.desc, location.toString(), GIST_TAGS, this)
-			).then(function () {
+			).then(() => {
 				swal(service.charAt(0).toUpperCase() + service.substr(1), 'The test results is shared', 'success');
 			}, showError);
 		}
@@ -520,7 +520,7 @@
 	//
 
 	function showError(err) {
-		var message = (err && err.message || 'Something went wrong');
+		const message = (err && err.message || 'Something went wrong');
 
 		if (err instanceof Error) {
 			console.error(err.stack);
@@ -549,10 +549,10 @@
 	}
 
 	function toStringBench(bench) {
-		var error = bench.error,
-			hz = bench.hz,
-			stats = bench.stats,
-			size = stats.sample.length;
+		const error = bench.error;
+		const hz = bench.hz;
+		const stats = bench.stats;
+		const size = stats.sample.length;
 
 		if (error) {
 			return error;
@@ -566,9 +566,9 @@
 	}
 
 	function getGistLastRevisionId(gist) {
-		var i = 0;
-		var history = gist.history;
-		var n = history.length;
+		let i = 0;
+		const history = gist.history;
+		const n = history.length;
 
 		for (; i < n; i++) {
 			if (history[i].change_status.total > 0) {
