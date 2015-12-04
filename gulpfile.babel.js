@@ -69,11 +69,11 @@ gulp.task('lint', () => {
 gulp.task('browser-sync', () => {
 	browserSync.init({
 		server: {
-			baseDir: config.buildDir
+			baseDir: config.browserSync.baseDir
 		},
-		port: config.browserPort,
+		port: config.browserSync.browserPort,
 		ui: {
-			port: config.UIPort
+			port: config.browserSync.UIPort
 		},
 		ghostMode: false
 	});
