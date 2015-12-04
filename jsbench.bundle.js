@@ -67,14 +67,14 @@ exports.default = (function app(feast, Benchmark, OAuth, github, share, swal) {
 			var _this = this;
 
 			// Предупреждалка
-			window.onbeforeunload = function onbeforeunload() {
+			window.onbeforeunload = function () {
 				if (!_this.attrs.gist.id && _this.hasChanges() || _this._latestUnsavedResults) {
 					return 'Your changes and test results have not been saved!';
 				}
 			};
 
 			// Роутинг
-			window.onhashchange = function onhashchange() {
+			window.onhashchange = function () {
 				new Promise(function (resolve, reject) {
 					if (_this.attrs.running) {
 						swal({
@@ -107,26 +107,27 @@ exports.default = (function app(feast, Benchmark, OAuth, github, share, swal) {
 		},
 
 		routing: function routing() {
-			var _this = this;
-			var attrs = _this.attrs;
+			var _this2 = this;
+
+			var attrs = this.attrs;
 			var hash = location.hash.substr(1);
 
 			try {
 				hash = decodeURIComponent(hash);
 			} catch (err) {}
 
-			if (_this._prevJSONStr === hash) {
+			if (this._prevJSONStr === hash) {
 				return;
 			}
 
-			_this._prevJSONStr = '';
-			_this._latestUnsavedResults = null;
-			_this.snippets = [];
+			this._prevJSONStr = '';
+			this._latestUnsavedResults = null;
+			this.snippets = [];
 
-			_this.refs.scrollTo.style.display = 'none';
+			this.refs.scrollTo.style.display = 'none';
 
 			// Сбрасываем основные аттрибуты
-			_this.set({
+			this.set({
 				desc: '',
 				gist: {},
 				setup: { code: '' },
@@ -136,11 +137,11 @@ exports.default = (function app(feast, Benchmark, OAuth, github, share, swal) {
 				results: null
 			}, null, true);
 
-			clearInterval(_this._saveId);
+			clearInterval(this._saveId);
 
 			// Чистим статус
-			Object.keys(_this.refs).forEach(function (name) {
-				/^stat/.test(name) && (_this.refs[name].innerHTML = '');
+			Object.keys(this.refs).forEach(function (name) {
+				/^stat/.test(name) && (_this2.refs[name].innerHTML = '');
 			});
 
 			return new Promise(function (resolve) {
@@ -149,10 +150,10 @@ exports.default = (function app(feast, Benchmark, OAuth, github, share, swal) {
 				// Gist ID
 				if (/^[a-z0-9]+$/.test(hash)) {
 					if (github.currentUser) {
-						_this.set('user', github.currentUser);
+						_this2.set('user', github.currentUser);
 
 						github.gist.checkStar(hash).then(function (state) {
-							_this.set('starred', state);
+							_this2.set('starred', state);
 						});
 					}
 
@@ -168,10 +169,10 @@ exports.default = (function app(feast, Benchmark, OAuth, github, share, swal) {
 						}
 
 						while (matches = R_SNIPPET.exec(gist.files['suite.js'].content)) {
-							_this.snippets.push(newSnippet(matches[1].replace(/\n\t\t/g, '\n').trim() + '\n'));
+							_this2.snippets.push(newSnippet(matches[1].replace(/\n\t\t/g, '\n').trim() + '\n'));
 						}
 
-						_this.set({
+						_this2.set({
 							'desc': gist.description.split(' (http')[0],
 							'gist': gist
 						});
@@ -179,7 +180,7 @@ exports.default = (function app(feast, Benchmark, OAuth, github, share, swal) {
 						firebase.child('stats').child(gist.id).child(getGistLastRevisionId(gist)).on('value', function (snapshot) {
 							var values = snapshot.val();
 
-							values && _this.setStats(Object.keys(values).map(function (key) {
+							values && _this2.setStats(Object.keys(values).map(function (key) {
 								return values[key];
 							}));
 						});
@@ -199,7 +200,7 @@ exports.default = (function app(feast, Benchmark, OAuth, github, share, swal) {
 						attrs.desc = restoredData.desc;
 						attrs.setup = restoredData.setup || { code: '' };
 						attrs.teardown = restoredData.teardown || { code: '' };
-						_this.snippets = restoredData.snippets.map(function (code) {
+						_this2.snippets = restoredData.snippets.map(function (code) {
 							return newSnippet(code);
 						});
 					} catch (err) {}
@@ -207,23 +208,21 @@ exports.default = (function app(feast, Benchmark, OAuth, github, share, swal) {
 					resolve();
 				}
 			})['catch'](showError).then(function () {
-				if (!Array.isArray(_this.snippets) || !_this.snippets.length) {
-					_this.snippets = [newSnippet()];
+				if (!Array.isArray(_this2.snippets) || !_this2.snippets.length) {
+					_this2.snippets = [newSnippet()];
 				}
 
 				// Используется при unload
-				_this._latestData = _this.toJSON();
-				_this._prevJSONStr = JSON.stringify(_this.toJSON());
+				_this2._latestData = _this2.toJSON();
+				_this2._prevJSONStr = JSON.stringify(_this2.toJSON());
 
 				// Cохраняем в `hash` и `localStorage` раз в 1sec
-				_this._saveId = setInterval(function () {
-					var jsonStr = '';
-
+				_this2._saveId = setInterval(function () {
 					if (!attrs.gist.id) {
-						jsonStr = JSON.stringify(_this.toJSON());
+						var jsonStr = JSON.stringify(_this2.toJSON());
 
-						if (_this._prevJSONStr !== jsonStr) {
-							_this._prevJSONStr = jsonStr;
+						if (_this2._prevJSONStr !== jsonStr) {
+							_this2._prevJSONStr = jsonStr;
 
 							try {
 								// location.hash = encodeURIComponent(jsonStr);
@@ -233,7 +232,7 @@ exports.default = (function app(feast, Benchmark, OAuth, github, share, swal) {
 					}
 				}, 1000);
 
-				_this.render();
+				_this2.render();
 			});
 		},
 
@@ -270,12 +269,9 @@ exports.default = (function app(feast, Benchmark, OAuth, github, share, swal) {
 		},
 
 		addStat: function addStat(stat) {
-			var gist = undefined;
-			var data = {};
-
 			if (stat) {
-				gist = this.attrs.gist;
-				data = {
+				var gist = this.attrs.gist;
+				var data = {
 					name: Benchmark.platform.name + ' ' + Benchmark.platform.version,
 					hz: stat
 				};
@@ -315,9 +311,10 @@ exports.default = (function app(feast, Benchmark, OAuth, github, share, swal) {
 		},
 
 		handleSuiteRun: function handleSuiteRun() {
+			var _this3 = this;
+
 			var refs = this.refs;
-			var _this = this;
-			var attrs = _this.attrs;
+			var attrs = this.attrs;
 			var suite = new Benchmark.Suite();
 			var index = {};
 
@@ -341,10 +338,8 @@ exports.default = (function app(feast, Benchmark, OAuth, github, share, swal) {
 
 				!suite.aborted && (refs['stats-' + stat.name].innerHTML = toStringBench(stat));
 			}).on('complete', function (evt) {
-				var results = undefined;
-
 				if (!suite.aborted) {
-					results = evt.currentTarget;
+					var results = evt.currentTarget;
 
 					suite.filter('fastest').forEach(function (stat) {
 						index[stat.name].status = 'fastest';
@@ -354,24 +349,25 @@ exports.default = (function app(feast, Benchmark, OAuth, github, share, swal) {
 						index[stat.name].status = 'slowest';
 					});
 
-					_this.addStat(results.map(function (bench) {
+					_this3.addStat(results.map(function (bench) {
 						return bench.hz;
 					}));
 
-					_this.set('running', false);
-					_this.refs.scrollTo.style.display = '';
+					_this3.set('running', false);
+					_this3.refs.scrollTo.style.display = '';
 				}
 			});
 
-			_this.set('running', true);
+			this.set('running', true);
 
 			suite.run({ 'async': true });
-			_this._suite = suite;
+			this._suite = suite;
 		},
 
 		handleSuiteSave: function handleSuiteSave() {
-			var _this = this;
-			var attrs = _this.attrs;
+			var _this4 = this;
+
+			var attrs = this.attrs;
 			var gist = attrs.gist;
 			var desc = attrs.desc || 'Untitled benchmark';
 			var suiteCode = ['"use strict";', '', '(function (factory) {', '	if (typeof Benchmark !== "undefined") {', '		factory(Benchmark);', '	} else {', '		factory(require("benchmark"));', '	}', '})(function (Benchmark) {', '	let suite = new Benchmark.Suite;', '',
@@ -383,7 +379,7 @@ exports.default = (function app(feast, Benchmark, OAuth, github, share, swal) {
 			!attrs.teardown.code.trim() ? '' : ['	Benchmark.prototype.teardown = function () {', '		' + attrs.teardown.code.trim().split('\n').join('\n\t\t'), '	};', ''].join('\n'),
 
 			// Snippets
-			_this.snippets.map(function (snippet) {
+			this.snippets.map(function (snippet) {
 				return ['	suite.add(' + JSON.stringify(getName(snippet)) + ', function () {', '		' + (snippet.code || '').trim().split('\n').join('\n\t\t'), '	});'].join('\n');
 			}).join('\n\n'), '', '	suite.on("cycle", function (evt) {', '		console.log("  " + evt);', '	});', '', '	suite.on("complete", function (evt) {', '		let results = evt.currentTarget.sort(function (a, b) {', '			return b.hz - a.hz;', '		});', '', '		results.forEach(function (item) {', '			console.log("  " + item);', '		});', '	});', '', '	console.log(' + JSON.stringify(desc) + ');', '	console.log(new Array(30).join("-"));', '	suite.run();', '});', ''].join('\n');
 
@@ -392,7 +388,7 @@ exports.default = (function app(feast, Benchmark, OAuth, github, share, swal) {
 				'index.html': { content: ['<!DOCTYPE html>', '<html>', '<head>', '	<meta charset="utf-8"/>', '	<title>' + desc + '</title>', '	<script src="https://cdnjs.cloudflare.com/ajax/libs/benchmark/1.0.0/benchmark.min.js"></script>', '	<script src="./suite.js"></script>', '</head>', '<body>', '	<h1>Open the console to view the results</h1>', '	<h2><code>cmd + alt + j</code> or <code>ctrl + alt + j</code></h2>', '</body>', '</html>', ''].join('\n') }
 			};
 
-			_this.set('saving', true);
+			this.set('saving', true);
 
 			// Запросим пользователя, чтобы быть 100% уверенными в актуальности данных
 			github.user().then(function (user) {
@@ -400,14 +396,14 @@ exports.default = (function app(feast, Benchmark, OAuth, github, share, swal) {
 					var isNew = !gist.id;
 
 					return github.gist.save(gist.id, desc + (isNew ? ' ' : ' (' + location.toString() + ') ') + GIST_TAGS, files).then(function (gist) {
-						_this.set('gist', gist); // (1)
+						_this4.set('gist', gist); // (1)
 						location.hash = gist.id; // (2)
 
 						swal('Saved', gist.html_url, 'success');
 
 						if (isNew) {
 							github.gist.save(gist.id, desc + ' (' + location.toString() + ') ' + GIST_TAGS);
-							_this.addStat(_this._latestUnsavedResults);
+							_this4.addStat(_this4._latestUnsavedResults);
 						}
 
 						return gist;
@@ -416,13 +412,13 @@ exports.default = (function app(feast, Benchmark, OAuth, github, share, swal) {
 
 				// Обновляем текущего юзера
 				github.setUser(user);
-				_this.set('user', user);
+				_this4.set('user', user);
 
 				// А теперь решим, fork или save
 				return gist.id && gist.owner.id !== user.id ? github.gist.fork(gist.id).then(save) : save(gist);
 			})['catch'](showError).then(function () {
-				_this._latestData = _this.toJSON();
-				_this.set('saving', false);
+				_this4._latestData = _this4.toJSON();
+				_this4.set('saving', false);
 			});
 		},
 
@@ -566,17 +562,19 @@ exports.default = (function chart(feast, google) {
 		},
 
 		didMount: function didMount() {
+			var _this = this;
+
 			google.load('visualization', '1', {
 				packages: ['corechart', 'bar'],
-				callback: (function callback() {
-					this.visualization = true;
-					this.redraw();
-				}).bind(this)
+				callback: function callback() {
+					_this.visualization = true;
+					_this.redraw();
+				}
 			});
 		},
 
 		redraw: function redraw() {
-			var _this = this;
+			var _this2 = this;
 
 			var data = this.attrs.data;
 
@@ -585,7 +583,7 @@ exports.default = (function chart(feast, google) {
 					this.chart = new google.visualization.BarChart(this.el);
 
 					google.visualization.events.addListener(this.chart, 'ready', function () {
-						_this.broadcast('ready');
+						_this2.broadcast('ready');
 					});
 				}
 
@@ -642,20 +640,21 @@ exports.default = (function editor(feast, ace) {
 
 		didMount: function didMount() {
 			var _this = this;
-			var editor = _this.editor = ace.edit(_this.el);
+
+			var editor = this.editor = ace.edit(this.el);
 
 			editor.$blockScrolling = Number.POSITIVE_INFINITY;
 
 			editor.setTheme('ace/theme/tomorrow');
 			editor.getSession().setMode('ace/mode/javascript');
-			editor.setOption('maxLines', _this.attrs['max-lines'] || 30);
-			editor.setOption('minLines', _this.attrs['min-lines'] || 4);
+			editor.setOption('maxLines', this.attrs['max-lines'] || 30);
+			editor.setOption('minLines', this.attrs['min-lines'] || 4);
 
 			editor.on('change', function () {
 				_this.attrs.data.code = editor.getValue();
 			});
 
-			editor.setValue(_this.attrs.data.code || '', 1);
+			editor.setValue(this.attrs.data.code || '', 1);
 			editor.focus();
 		},
 

@@ -57,19 +57,17 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 		},
 
 		didMount: function didMount() {
-			const _this = this;
-
 			// Предупреждалка
-			window.onbeforeunload = function onbeforeunload() {
-				if (!_this.attrs.gist.id && _this.hasChanges() || _this._latestUnsavedResults) {
+			window.onbeforeunload = () => {
+				if (!this.attrs.gist.id && this.hasChanges() || this._latestUnsavedResults) {
 					return 'Your changes and test results have not been saved!';
 				}
 			};
 
 			// Роутинг
-			window.onhashchange = function onhashchange() {
+			window.onhashchange = () => {
 				new Promise((resolve, reject) => {
-					if (_this.attrs.running) {
+					if (this.attrs.running) {
 						swal({
 							title: 'Are you sure?',
 							type: 'warning',
@@ -79,7 +77,7 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 							cancelButtonText: 'Abort'
 						}, (isConfirm) => {
 							if (!isConfirm) {
-								_this._suite.abort();
+								this._suite.abort();
 								resolve();
 							} else {
 								reject();
@@ -89,7 +87,7 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 						resolve();
 					}
 				}).then(() => {
-					_this.routing();
+					this.routing();
 				});
 			};
 
@@ -100,26 +98,25 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 		},
 
 		routing: function routing() {
-			const _this = this;
-			const attrs = _this.attrs;
+			const attrs = this.attrs;
 			let hash = location.hash.substr(1);
 
 			try {
 				hash = decodeURIComponent(hash);
 			} catch (err) {}
 
-			if (_this._prevJSONStr === hash) {
+			if (this._prevJSONStr === hash) {
 				return;
 			}
 
-			_this._prevJSONStr = '';
-			_this._latestUnsavedResults = null;
-			_this.snippets = [];
+			this._prevJSONStr = '';
+			this._latestUnsavedResults = null;
+			this.snippets = [];
 
-			_this.refs.scrollTo.style.display = 'none';
+			this.refs.scrollTo.style.display = 'none';
 
 			// Сбрасываем основные аттрибуты
-			_this.set({
+			this.set({
 				desc: '',
 				gist: {},
 				setup: {code: ''},
@@ -129,11 +126,11 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 				results: null
 			}, null, true);
 
-			clearInterval(_this._saveId);
+			clearInterval(this._saveId);
 
 			// Чистим статус
-			Object.keys(_this.refs).forEach((name) => {
-				/^stat/.test(name) && (_this.refs[name].innerHTML = '');
+			Object.keys(this.refs).forEach((name) => {
+				/^stat/.test(name) && (this.refs[name].innerHTML = '');
 			});
 
 			return new Promise((resolve) => {
@@ -142,10 +139,10 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 				// Gist ID
 				if (/^[a-z0-9]+$/.test(hash)) {
 					if (github.currentUser) {
-						_this.set('user', github.currentUser);
+						this.set('user', github.currentUser);
 
 						github.gist.checkStar(hash).then((state) => {
-							_this.set('starred', state);
+							this.set('starred', state);
 						});
 					}
 
@@ -161,10 +158,10 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 						}
 
 						while ((matches = R_SNIPPET.exec(gist.files['suite.js'].content))) {
-							_this.snippets.push(newSnippet(matches[1].replace(/\n\t\t/g, '\n').trim() + '\n'));
+							this.snippets.push(newSnippet(matches[1].replace(/\n\t\t/g, '\n').trim() + '\n'));
 						}
 
-						_this.set({
+						this.set({
 							'desc': gist.description.split(' (http')[0],
 							'gist': gist
 						});
@@ -172,7 +169,7 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 						firebase.child('stats').child(gist.id).child(getGistLastRevisionId(gist)).on('value', (snapshot) => {
 							const values = snapshot.val();
 
-							values && _this.setStats(Object.keys(values).map((key) => {
+							values && this.setStats(Object.keys(values).map((key) => {
 								return values[key];
 							}));
 						});
@@ -194,7 +191,7 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 						attrs.desc = restoredData.desc;
 						attrs.setup = restoredData.setup || {code: ''};
 						attrs.teardown = restoredData.teardown || {code: ''};
-						_this.snippets = restoredData.snippets.map((code) => {
+						this.snippets = restoredData.snippets.map((code) => {
 							return newSnippet(code);
 						});
 					} catch (err) {}
@@ -204,23 +201,21 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 			})
 				['catch'](showError)
 				.then(() => {
-					if (!Array.isArray(_this.snippets) || !_this.snippets.length) {
-						_this.snippets = [newSnippet()];
+					if (!Array.isArray(this.snippets) || !this.snippets.length) {
+						this.snippets = [newSnippet()];
 					}
 
 					// Используется при unload
-					_this._latestData = _this.toJSON();
-					_this._prevJSONStr = JSON.stringify(_this.toJSON());
+					this._latestData = this.toJSON();
+					this._prevJSONStr = JSON.stringify(this.toJSON());
 
 					// Cохраняем в `hash` и `localStorage` раз в 1sec
-					_this._saveId = setInterval(() => {
-						let jsonStr = '';
-
+					this._saveId = setInterval(() => {
 						if (!attrs.gist.id) {
-							jsonStr = JSON.stringify(_this.toJSON());
+							const jsonStr = JSON.stringify(this.toJSON());
 
-							if (_this._prevJSONStr !== jsonStr) {
-								_this._prevJSONStr = jsonStr;
+							if (this._prevJSONStr !== jsonStr) {
+								this._prevJSONStr = jsonStr;
 
 								try {
 									// location.hash = encodeURIComponent(jsonStr);
@@ -230,7 +225,7 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 						}
 					}, 1000);
 
-					_this.render();
+					this.render();
 				});
 		},
 
@@ -267,12 +262,9 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 		},
 
 		addStat: function addStat(stat) {
-			let gist;
-			let data = {};
-
 			if (stat) {
-				gist = this.attrs.gist;
-				data = {
+				const gist = this.attrs.gist;
+				const data = {
 					name: Benchmark.platform.name + ' ' + Benchmark.platform.version,
 					hz: stat
 				};
@@ -313,8 +305,7 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 
 		handleSuiteRun: function handleSuiteRun() {
 			const refs = this.refs;
-			const _this = this;
-			const attrs = _this.attrs;
+			const attrs = this.attrs;
 			const suite = new Benchmark.Suite;
 			const index = {};
 
@@ -340,10 +331,8 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 					!suite.aborted && (refs['stats-' + stat.name].innerHTML = toStringBench(stat));
 				})
 				.on('complete', (evt) => {
-					let results;
-
 					if (!suite.aborted) {
-						results = evt.currentTarget;
+						const results = evt.currentTarget;
 
 						suite.filter('fastest').forEach((stat) => {
 							index[stat.name].status = 'fastest';
@@ -353,24 +342,23 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 							index[stat.name].status = 'slowest';
 						});
 
-						_this.addStat(results.map((bench) => {
+						this.addStat(results.map((bench) => {
 							return bench.hz;
 						}));
 
-						_this.set('running', false);
-						_this.refs.scrollTo.style.display = '';
+						this.set('running', false);
+						this.refs.scrollTo.style.display = '';
 					}
 				});
 
-			_this.set('running', true);
+			this.set('running', true);
 
 			suite.run({'async': true});
-			_this._suite = suite;
+			this._suite = suite;
 		},
 
 		handleSuiteSave: function handleSuiteSave() {
-			const _this = this;
-			const attrs = _this.attrs;
+			const attrs = this.attrs;
 			const gist = attrs.gist;
 			const desc = (attrs.desc || 'Untitled benchmark');
 			const suiteCode = [
@@ -403,7 +391,7 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 				].join('\n')),
 
 				// Snippets
-				_this.snippets.map((snippet) => {
+				this.snippets.map((snippet) => {
 					return [
 						'	suite.add(' + JSON.stringify(getName(snippet)) + ', function () {',
 						'		' + (snippet.code || '').trim().split('\n').join('\n\t\t'),
@@ -452,24 +440,24 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 				].join('\n')}
 			};
 
-			_this.set('saving', true);
+			this.set('saving', true);
 
 			// Запросим пользователя, чтобы быть 100% уверенными в актуальности данных
 			github.user()
 				.then((user) => {
-					const save = function save(gist) {
+					const save = (gist) => {
 						const isNew = !gist.id;
 
 						return github.gist.save(gist.id, desc + (isNew ? ' ' : ' (' + location.toString() + ') ') +
 								GIST_TAGS, files).then((gist) => {
-									_this.set('gist', gist); // (1)
+									this.set('gist', gist); // (1)
 									location.hash = gist.id; // (2)
 
 									swal('Saved', gist.html_url, 'success');
 
 									if (isNew) {
 										github.gist.save(gist.id, desc + ' (' + location.toString() + ') ' + GIST_TAGS);
-										_this.addStat(_this._latestUnsavedResults);
+										this.addStat(this._latestUnsavedResults);
 									}
 
 									return gist;
@@ -478,14 +466,14 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 
 					// Обновляем текущего юзера
 					github.setUser(user);
-					_this.set('user', user);
+					this.set('user', user);
 
 					// А теперь решим, fork или save
 					return (gist.id && gist.owner.id !== user.id) ? github.gist.fork(gist.id).then(save) : save(gist);
 				})
 					['catch'](showError).then(() => {
-						_this._latestData = _this.toJSON();
-						_this.set('saving', false);
+						this._latestData = this.toJSON();
+						this.set('saving', false);
 					});
 		},
 
@@ -544,8 +532,10 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 	}
 
 	function getName(snippet) {
-		return (snippet.code !== undefined ? snippet.code : snippet).trim()
-				.split('\n')[0].replace(/(^\/[*/]+|\**\/$)/g, '').trim();
+		return (snippet.code !== undefined ? snippet.code : snippet)
+			.trim()
+			.split('\n')[0].replace(/(^\/[*/]+|\**\/$)/g, '')
+			.trim();
 	}
 
 	function toStringBench(bench) {
