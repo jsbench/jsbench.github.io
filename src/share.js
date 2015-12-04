@@ -3,49 +3,21 @@ export default (function share(fetch) {
 
 	const SCREEN_WIDTH = screen.width;
 	const SCREEN_HEIGHT = screen.height;
-	let twttr = {};
-	let facebook = {};
 
-	function generateChartsAsBlob(app, width, height) {
-		return new Promise((resolve) => {
-			const el = document.createElement('div');
-			const chart = new UIChart({
-				data: app.get('results'),
-				mode: 'fit'
-			});
-
-			el.className = 'invisible';
-			el.style.width = width + 'px';
-			el.style.height = height + 'px';
-
-			chart.on('ready', () => {
-				const dataURI = chart.toDataURI();
-
-				chart.destroy();
-				document.body.removeChild(el);
-
-				resolve(dataURLtoBlob(dataURI));
-			});
-
-			document.body.appendChild(el);
-			chart.renderTo(el);
-		});
-	}
-
-	twttr = {
+	const twttr = {
 		url: 'https://twitter.com/intent/tweet?text=',
 		length: 140,
 		width: 550,
 		height: 250
 	};
 
-	facebook = {
+	const facebook = {
 		id: '900218293360254',
 		publishUrl: 'https://graph.facebook.com/me/photos',
 		width: 1200,
 		height: 630,
 
-		init: function init() {
+		init() {
 			return this._promiseInit || (this._promiseInit = new Promise((resolve) => {
 				window.fbAsyncInit = function fbAsyncInit() {
 					const FB = window.FB;
@@ -75,7 +47,7 @@ export default (function share(fetch) {
 			}));
 		},
 
-		login: function login() {
+		login() {
 			return this._promiseLogin || (this._promiseLogin = this.init().then((api) => {
 				return new Promise((resolve, reject) => {
 					api.login((response) => {
@@ -93,9 +65,37 @@ export default (function share(fetch) {
 		}
 	};
 
+	// todo: Вынести в утилиты
+	function generateChartsAsBlob(app, width, height) {
+		return new Promise((resolve) => {
+			const el = document.createElement('div');
+			const chart = new UIChart({
+				data: app.get('results'),
+				mode: 'fit'
+			});
+
+			el.className = 'invisible';
+			el.style.width = width + 'px';
+			el.style.height = height + 'px';
+
+			chart.on('ready', () => {
+				const dataURI = chart.toDataURI();
+
+				chart.destroy();
+				document.body.removeChild(el);
+
+				resolve(dataURLtoBlob(dataURI));
+			});
+
+			document.body.appendChild(el);
+			chart.renderTo(el);
+		});
+	}
+
+
 	// Export
 	window.share = {
-		twitter: function twitter(desc, url, tags) {
+		twitter(desc, url, tags) {
 			const top = Math.max(Math.round((SCREEN_HEIGHT / 3) - (twttr.height / 2)), 0);
 			const left = Math.round((SCREEN_WIDTH / 2) - (twttr.width / 2));
 			const message = desc.substr(0, twttr.length - (url.length + tags.length + 5)) + ': ' + url + ' ' + tags;
@@ -105,7 +105,7 @@ export default (function share(fetch) {
 			window.open(twttr.url + encodeURIComponent(message), '', params + extras);
 		},
 
-		facebook: function facebook(desc, url, tags, app) {
+		facebook(desc, url, tags, app) {
 			return Promise.all([
 				facebook.login(),
 				generateChartsAsBlob(app, facebook.width, facebook.height)
@@ -134,7 +134,7 @@ export default (function share(fetch) {
 				});
 		},
 
-		init: function init() {
+		init() {
 			facebook.init();
 		}
 	};

@@ -62,12 +62,12 @@ export default (function github(OAuth, swal) {
 	window.github = {
 		currentUser: null,
 
-		setUser: function setUser(user) {
+		setUser(user) {
 			this.currentUser = user;
 			_store(STORE_USER_KEY, user);
 		},
 
-		user: function user(login) {
+		user(login) {
 			return _user || _call('get', 'user' + (login ? '/' + login : '')).then((user) => {
 				!login && github.setUser(user);
 				return user;
@@ -75,10 +75,10 @@ export default (function github(OAuth, swal) {
 		},
 
 		gist: {
-			findOne: function findOne(id) {
+			findOnee(id) {
 				let promise;
 				const url = 'gists/' + id;
-				const _fetch = function _fetch() {
+				const _fetch = () => {
 					return fetch(API_ENDPOINT + url).then((res) => {
 						if (res.status !== API_STATUS_OK) {
 							throw 'Error: ' + res.status;
@@ -107,7 +107,7 @@ export default (function github(OAuth, swal) {
 				});
 			},
 
-			save: function save(id, desc, files) {
+			save(id, desc, files) {
 				const gist = _gists[id];
 				let changed;
 
@@ -131,11 +131,11 @@ export default (function github(OAuth, swal) {
 				});
 			},
 
-			fork: function fork(id) {
+			fork(id) {
 				return _call('post', 'gists/' + id + '/fork');
 			},
 
-			star: function star(id, state) {
+			star(id, state) {
 				return _call(state ? 'put' : 'del', 'gists/' + id + '/star').then(() => {
 					_stars[id] = state;
 					_store(STORE_STARS_KEY, _stars);
@@ -143,7 +143,7 @@ export default (function github(OAuth, swal) {
 				});
 			},
 
-			checkStar: function checkStar(id) {
+			checkStar(id) {
 				if (typeof _stars[id] === 'undefined') {
 					return _call('get', 'gists/' + id + '/star')
 						.then(() => { _stars[id] = true; }, () => { _stars[id] = false; })
