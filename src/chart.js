@@ -10,12 +10,12 @@ export default (function chart(feast, google) {
 		template: feast.parse('<div/>'),
 
 		attrChanged: {
-			'data': function data() {
+			data() {
 				this.visualization && this.redraw();
 			}
 		},
 
-		didMount: function didMount() {
+		didMount() {
 			google.load('visualization', '1', {
 				packages: ['corechart', 'bar'],
 				callback: () => {
@@ -25,7 +25,7 @@ export default (function chart(feast, google) {
 			});
 		},
 
-		redraw: function redraw() {
+		redraw() {
 			const data = this.attrs.data;
 
 			if (google.visualization && data) {
@@ -63,7 +63,7 @@ export default (function chart(feast, google) {
 			}
 		},
 
-		toDataURI: function toDataURI() {
+		toDataURI() {
 			return this.chart.getImageURI();
 		}
 	});

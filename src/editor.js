@@ -9,7 +9,7 @@ export default (function editor(feast, ace) {
 		name: 'editor',
 		template: feast.parse('<div bem:mod="{attrs.mode}"/>'),
 
-		didMount: function didMount() {
+		didMount() {
 			const editor = this.editor = ace.edit(this.el);
 
 			editor.$blockScrolling = Number.POSITIVE_INFINITY;
@@ -27,7 +27,7 @@ export default (function editor(feast, ace) {
 			editor.focus();
 		},
 
-		didUnmount: function didUnmount() {
+		didUnmount() {
 			this.editor.destroy();
 		}
 	});
