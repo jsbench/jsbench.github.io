@@ -75,7 +75,7 @@ export default (function github(OAuth, swal) {
 		},
 
 		gist: {
-			findOnee(id) {
+			findOne(id) {
 				let promise;
 				const url = 'gists/' + id;
 				const _fetch = () => {

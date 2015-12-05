@@ -730,7 +730,7 @@ exports.default = (function github(OAuth, swal) {
 		},
 
 		gist: {
-			findOnee: function findOnee(id) {
+			findOne: function findOne(id) {
 				var promise = undefined;
 				var url = 'gists/' + id;
 				var _fetch = function _fetch() {
