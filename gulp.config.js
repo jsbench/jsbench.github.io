@@ -2,20 +2,23 @@
 
 export default {
 
-	browserPort: 3000,
-	UIPort: 3001,
-
 	sourceDir: './src/',
-	buildDir: './',
+	buildDir: './bundles/',
+
+	browserSync: {
+		browserPort: 3000,
+		UIPort: 3001,
+		baseDir: './'
+	},
 
 	scripts: {
 		src: 'src/**/*.js',
-		dest: '.',
-		entryPoint: 'jsbench.bundle.js'
+		dest: 'bundles/js',
+		entryPoint: 'jsbench.js'
 	},
 
 	browserify: {
-		bundleName: 'jsbench.bundle.js',
+		bundleName: 'jsbench.js',
 		prodSourcemap: false
 	}
 };
