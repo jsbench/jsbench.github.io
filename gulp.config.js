@@ -5,6 +5,8 @@ export default {
 	sourceDir: './src/',
 	buildDir: './bundles/',
 
+	cacheManifestName: 'app.cache.manifest',
+
 	browserSync: {
 		browserPort: 3000,
 		UIPort: 3001,
