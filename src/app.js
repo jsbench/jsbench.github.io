@@ -293,6 +293,14 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 			};
 		},
 
+		handleScrollToEnd() {
+			// Скрываем кнопку скролла при достижении конца страницы
+			if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
+				console.log('scroll end');
+				this.handleScrollTo();
+			}
+		},
+
 		handleSuiteAdd() {
 			this.snippets.push(newSnippet());
 			this.render();
@@ -348,6 +356,8 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 
 						this.set('running', false);
 						this.refs.scrollTo.style.display = '';
+
+						this.$on(window, 'scroll', 'handleScrollToEnd');
 					}
 				});
 
@@ -490,6 +500,7 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 		handleScrollTo() {
 			this.refs.scrollTo.style.display = 'none';
 			this.refs.chart.scrollIntoView();
+			this.$off(window, 'scroll', 'handleScrollToEnd');
 		},
 
 		handleShare(evt) {
