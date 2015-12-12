@@ -296,7 +296,6 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 		handleScrollToEnd() {
 			// Скрываем кнопку скролла при достижении конца страницы
 			if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
-				console.log('scroll end');
 				this.handleScrollTo();
 			}
 		},
