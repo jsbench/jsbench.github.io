@@ -294,6 +294,12 @@ exports.default = (function app(feast, Benchmark, OAuth, github, share, swal) {
 				})
 			};
 		},
+		handleScrollToEnd: function handleScrollToEnd() {
+			// Скрываем кнопку скролла при достижении конца страницы
+			if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
+				this.handleScrollTo();
+			}
+		},
 		handleSuiteAdd: function handleSuiteAdd() {
 			this.snippets.push(newSnippet());
 			this.render();
@@ -347,6 +353,8 @@ exports.default = (function app(feast, Benchmark, OAuth, github, share, swal) {
 
 					_this3.set('running', false);
 					_this3.refs.scrollTo.style.display = '';
+
+					_this3.$on(window, 'scroll', 'handleScrollToEnd');
 				}
 			});
 
@@ -423,6 +431,7 @@ exports.default = (function app(feast, Benchmark, OAuth, github, share, swal) {
 		handleScrollTo: function handleScrollTo() {
 			this.refs.scrollTo.style.display = 'none';
 			this.refs.chart.scrollIntoView();
+			this.$off(window, 'scroll', 'handleScrollToEnd');
 		},
 		handleShare: function handleShare(evt) {
 			var service = evt.details;
