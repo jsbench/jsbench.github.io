@@ -423,7 +423,7 @@
 				'		});',
 				'',
 				'		results.forEach(function (item) {',
-				'			console.log((idx + 1) + ". " + item);
+				'			console.log((idx + 1) + ". " + item);',
 				'		});',
 				'	});',
 				'',
