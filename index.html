@@ -32,17 +32,19 @@
 
 		<div bem:elem="head">
 			<table>
-				<tr>
-					<fn:if test="attrs.gist.id">
-						<td remit:click="gist:star" bem:elem="star" bem:mod="{attrs.starred}" width="33px"/>
+				<tbody>
+					<tr>
+						<fn:if test="attrs.gist.id">
+							<td remit:click="gist:star" bem:elem="star" bem:mod="{attrs.starred}" width="33px"/>
+							<td width="10"></td>
+						</fn:if>
+						<td><input value="{attrs.desc}" on-blur="_this.set('desc', evt.target.value);" placeholder="Description" class="input"/></td>
 						<td width="10"></td>
-					</fn:if>
-					<td><input value="{attrs.desc}" on-blur="_this.set('desc', evt.target.value);" placeholder="Description" class="input"/></td>
-					<td width="10"></td>
-					<td width="15%"><b:btn key="save" disabled="{attrs.saving}" remit:click="suite:save" value="{attrs.gist.id && attrs.gist.owner.id != attrs.user.id ? 'Fork and save' : 'Save'}"/></td>
-					<td width="10"></td>
-					<td width="15%"><fn:apply-match name="btn-run"/></td>
-				</tr>
+						<td width="15%"><b:btn key="save" disabled="{attrs.saving}" remit:click="suite:save" value="{attrs.gist.id && attrs.gist.owner.id != attrs.user.id ? 'Fork and save' : 'Save'}"/></td>
+						<td width="10"></td>
+						<td width="15%"><fn:apply-match name="btn-run"/></td>
+					</tr>
+				</tbody>
 			</table>
 		</div>
 
@@ -65,11 +67,13 @@
 
 		<div bem:elem="foot">
 			<table>
-				<tr>
-					<td><b:btn key="add" remit:click="snippet:add" value="Add code snippet"/></td>
-					<td width="10"></td>
-					<td width="15%"><fn:apply-match name="btn-run"/></td>
-				</tr>
+				<tbody>
+					<tr>
+						<td><b:btn key="add" remit:click="snippet:add" value="Add code snippet"/></td>
+						<td width="10"></td>
+						<td width="15%"><fn:apply-match name="btn-run"/></td>
+					</tr>
+				</tbody>
 			</table>
 
 			<div ref="scrollTo" remit:click="scrollTo" bem:elem="scrollto" style="display: none"/>

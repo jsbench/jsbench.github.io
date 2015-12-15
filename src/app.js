@@ -153,7 +153,7 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 
 						while ((matches = R_CONFIG.exec(gist.files['suite.js'].content))) {
 							attrs[matches[1]] = {
-								code: matches[2].replace(/\n\t\t/g, '\n').trim() + '\n'
+								code: trimStr(matches[2].replace(/\n\t\t/g, '\n')) + '\n'
 							};
 						}
 
@@ -314,9 +314,9 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 				index[snippet.id] = snippet;
 
 				suite.add(snippet.id, {
-					fn: snippet.code.trim(),
-					setup: attrs.setup.code,
-					teardown: attrs.teardown.code,
+					fn: trimStr(snippet.code),
+					setup: trimStr(attrs.setup.code),
+					teardown: trimStr(attrs.teardown.code),
 					onCycle: function onCycle(evt) {
 						refs['stats-' + snippet.id].innerHTML = toStringBench(evt.target);
 					}
@@ -361,6 +361,9 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 			const attrs = this.attrs;
 			const gist = attrs.gist;
 			const desc = (attrs.desc || 'Untitled benchmark');
+			const setupCode = trimStr(attrs.setup.code);
+			const teardownCode = trimStr(attrs.teardown.code);
+
 			const suiteCode = [
 				'"use strict";',
 				'',
@@ -371,21 +374,21 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 				'		factory(require("benchmark"));',
 				'	}',
 				'})(function (Benchmark) {',
-				'	let suite = new Benchmark.Suite;',
+				'	var suite = new Benchmark.Suite;',
 				'',
 
 				// Setup
-				(!attrs.setup.code.trim() ? '' : [
+				(!setupCode ? '' : [
 					'	Benchmark.prototype.setup = function () {',
-					'		' + attrs.setup.code.trim().split('\n').join('\n\t\t'),
+					'		' + setupCode.split('\n').join('\n\t\t'),
 					'	};',
 					''
 				].join('\n')),
 
 				// Teardown
-				(!attrs.teardown.code.trim() ? '' : [
+				(!teardownCode ? '' : [
 					'	Benchmark.prototype.teardown = function () {',
-					'		' + attrs.teardown.code.trim().split('\n').join('\n\t\t'),
+					'		' + teardownCode.split('\n').join('\n\t\t'),
 					'	};',
 					''
 				].join('\n')),
@@ -394,22 +397,24 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 				this.snippets.map((snippet) => {
 					return [
 						'	suite.add(' + JSON.stringify(getName(snippet)) + ', function () {',
-						'		' + (snippet.code || '').trim().split('\n').join('\n\t\t'),
+						'		' + trimStr(snippet.code).split('\n').join('\n\t\t'),
 						'	});'
 					].join('\n');
 				}).join('\n\n'),
 				'',
 				'	suite.on("cycle", function (evt) {',
-				'		console.log("  " + evt);',
+				'		console.log(" - " + evt.target);',
 				'	});',
 				'',
 				'	suite.on("complete", function (evt) {',
-				'		let results = evt.currentTarget.sort(function (a, b) {',
+				'		console.log(new Array(30).join("-"));',
+				'',
+				'		var results = evt.currentTarget.sort(function (a, b) {',
 				'			return b.hz - a.hz;',
 				'		});',
 				'',
 				'		results.forEach(function (item) {',
-				'			console.log("  " + item);',
+				'			console.log((idx + 1) + ". " + item);',
 				'		});',
 				'	});',
 				'',
@@ -525,6 +530,10 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 		};
 	}
 
+	function trimStr(value) {
+		return value == null ? '' : String(value).trim();
+	}
+
 	function formatNumber(number) {
 		number = String(number).split('.');
 
@@ -532,10 +541,11 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 	}
 
 	function getName(snippet) {
-		return (snippet.code !== undefined ? snippet.code : snippet)
-			.trim()
-			.split('\n')[0].replace(/(^\/[*/]+|\**\/$)/g, '')
-			.trim();
+		return String(snippet.code !== undefined ? snippet.code : snippet)
+				.trim()
+				.split('\n')[0]
+					.replace(/(^\/[*/]+|\**\/$)/g, '')
+					.trim();
 	}
 
 	function toStringBench(bench) {
