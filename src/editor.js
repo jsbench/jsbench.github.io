@@ -9,7 +9,7 @@ export default (function editor(feast, ace) {
 		name: 'editor',
 		template: feast.parse('<div bem:mod="{attrs.mode}"/>'),
 
-		didMount: function didMount() {
+		didMount() {
 			try {
 				const editor = this.editor = ace.edit(this.el);
 
@@ -31,8 +31,8 @@ export default (function editor(feast, ace) {
 			}
 		},
 
-		didUnmount: function didUnmount() {
-			this.editor.destroy();
+		didUnmount() {
+			this.editor && this.editor.destroy();
 		}
 	});
 })(window.feast, window.ace);

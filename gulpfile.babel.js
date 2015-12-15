@@ -8,6 +8,9 @@ import babelify    from 'babelify';
 import source      from 'vinyl-source-stream';
 import notify      from 'gulp-notify';
 import browserSync from 'browser-sync';
+import manifest    from 'gulp-manifest';
+import path        from 'path';
+import mergeStream from 'merge-stream';
 
 function handleErrors() {
 	let args = Array.prototype.slice.call(arguments);
@@ -66,18 +69,41 @@ gulp.task('lint', () => {
 		.pipe(eslint.failOnError());
 });
 
+gulp.task('manifest', () => {
+	mergeStream(
+		gulp.src([
+			path.join('bundles/js/*.js'),
+			path.join('vendor/**/*.js'),
+			path.join('st/*.css'),
+			path.join('st/images/**/*.{svg,png,ico,jpg}')
+		], {
+			base: './'
+		})
+	)
+	.pipe(manifest({
+		prefix: 'http://jsbench.github.io/',
+		hash: true,
+		timestamp: false,
+		preferOnline: false,
+		network: ['*'],
+		filename: config.cacheManifestName,
+		exclude: config.cacheManifestName
+	 }))
+	.pipe(gulp.dest('./'));
+});
+
 gulp.task('browser-sync', () => {
 	browserSync.init({
 		server: {
-			baseDir: config.buildDir
+			baseDir: config.browserSync.baseDir
 		},
-		port: config.browserPort,
+		port: config.browserSync.browserPort,
 		ui: {
-			port: config.UIPort
+			port: config.browserSync.UIPort
 		},
 		ghostMode: false
 	});
 });
 
-gulp.task('build', ['lint', 'browserify']);
+gulp.task('build', ['lint', 'browserify', 'manifest']);
 gulp.task('default', ['build', 'browser-sync']);

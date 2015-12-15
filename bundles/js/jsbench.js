@@ -48,8 +48,8 @@ exports.default = (function app(feast, Benchmark, OAuth, github, share, swal) {
 		},
 
 		attrChanged: {
-			desc: function desc(desc) {
-				document.title = (desc ? desc + ' :: ' : '') + document.title.split('::').pop().trim();
+			desc: function desc(_desc) {
+				document.title = (_desc ? _desc + ' :: ' : '') + document.title.split('::').pop().trim();
 			}
 		},
 
@@ -62,7 +62,6 @@ exports.default = (function app(feast, Benchmark, OAuth, github, share, swal) {
 		hasChanges: function hasChanges() {
 			return JSON.stringify(this._latestData) !== JSON.stringify(this.toJSON());
 		},
-
 		didMount: function didMount() {
 			var _this = this;
 
@@ -105,7 +104,6 @@ exports.default = (function app(feast, Benchmark, OAuth, github, share, swal) {
 				share.init();
 			});
 		},
-
 		routing: function routing() {
 			var _this2 = this;
 
@@ -235,7 +233,6 @@ exports.default = (function app(feast, Benchmark, OAuth, github, share, swal) {
 				_this2.render();
 			});
 		},
-
 		setStats: function setStats(values) {
 			var stats = {};
 
@@ -267,7 +264,6 @@ exports.default = (function app(feast, Benchmark, OAuth, github, share, swal) {
 				})
 			});
 		},
-
 		addStat: function addStat(stat) {
 			if (stat) {
 				var gist = this.attrs.gist;
@@ -286,7 +282,6 @@ exports.default = (function app(feast, Benchmark, OAuth, github, share, swal) {
 				}
 			}
 		},
-
 		toJSON: function toJSON() {
 			var attrs = this.attrs;
 
@@ -299,17 +294,20 @@ exports.default = (function app(feast, Benchmark, OAuth, github, share, swal) {
 				})
 			};
 		},
-
+		handleScrollToEnd: function handleScrollToEnd() {
+			// Скрываем кнопку скролла при достижении конца страницы
+			if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
+				this.handleScrollTo();
+			}
+		},
 		handleSuiteAdd: function handleSuiteAdd() {
 			this.snippets.push(newSnippet());
 			this.render();
 		},
-
 		handleSuiteRemove: function handleSuiteRemove(evt) {
 			this.snippets.splice(this.snippets.indexOf(evt.details), 1);
 			this.render();
 		},
-
 		handleSuiteRun: function handleSuiteRun() {
 			var _this3 = this;
 
@@ -355,6 +353,8 @@ exports.default = (function app(feast, Benchmark, OAuth, github, share, swal) {
 
 					_this3.set('running', false);
 					_this3.refs.scrollTo.style.display = '';
+
+					_this3.$on(window, 'scroll', 'handleScrollToEnd');
 				}
 			});
 
@@ -363,7 +363,6 @@ exports.default = (function app(feast, Benchmark, OAuth, github, share, swal) {
 			suite.run({ 'async': true });
 			this._suite = suite;
 		},
-
 		handleSuiteSave: function handleSuiteSave() {
 			var _this4 = this;
 
@@ -373,7 +372,7 @@ exports.default = (function app(feast, Benchmark, OAuth, github, share, swal) {
 			var setupCode = trimStr(attrs.setup.code);
 			var teardownCode = trimStr(attrs.teardown.code);
 
-			var suiteCode = ['"use strict";', '', '(function (factory) {', '	if (typeof Benchmark !== "undefined") {', '		factory(Benchmark);', '	} else {', '		factory(require("benchmark"));', '	}', '})(function (Benchmark) {', '	let suite = new Benchmark.Suite;', '',
+			var suiteCode = ['"use strict";', '', '(function (factory) {', '	if (typeof Benchmark !== "undefined") {', '		factory(Benchmark);', '	} else {', '		factory(require("benchmark"));', '	}', '})(function (Benchmark) {', '	var suite = new Benchmark.Suite;', '',
 
 			// Setup
 			!setupCode ? '' : ['	Benchmark.prototype.setup = function () {', '		' + setupCode.split('\n').join('\n\t\t'), '	};', ''].join('\n'),
@@ -424,22 +423,19 @@ exports.default = (function app(feast, Benchmark, OAuth, github, share, swal) {
 				_this4.set('saving', false);
 			});
 		},
-
 		handleStar: function handleStar() {
 			this.invert('starred');
 			github.gist.star(this.attrs.gist.id, this.attrs.starred);
 		},
-
 		handleConfigure: function handleConfigure(evt) {
 			evt.details.visible = !evt.details.visible;
 			this.render();
 		},
-
 		handleScrollTo: function handleScrollTo() {
 			this.refs.scrollTo.style.display = 'none';
 			this.refs.chart.scrollIntoView();
+			this.$off(window, 'scroll', 'handleScrollToEnd');
 		},
-
 		handleShare: function handleShare(evt) {
 			var service = evt.details;
 
@@ -563,7 +559,7 @@ exports.default = (function chart(feast, google) {
 		template: feast.parse('<div/>'),
 
 		attrChanged: {
-			'data': function data() {
+			data: function data() {
 				this.visualization && this.redraw();
 			}
 		},
@@ -579,7 +575,6 @@ exports.default = (function chart(feast, google) {
 				}
 			});
 		},
-
 		redraw: function redraw() {
 			var _this2 = this;
 
@@ -616,7 +611,6 @@ exports.default = (function chart(feast, google) {
 				});
 			}
 		},
-
 		toDataURI: function toDataURI() {
 			return this.chart.getImageURI();
 		}
@@ -670,9 +664,8 @@ exports.default = (function editor(feast, ace) {
 				console.log('[Ace.error]', err);
 			}
 		},
-
 		didUnmount: function didUnmount() {
-			this.editor.destroy();
+			this.editor && this.editor.destroy();
 		}
 	});
 })(window.feast, window.ace);
@@ -751,7 +744,6 @@ exports.default = (function github(OAuth, swal) {
 			this.currentUser = user;
 			_store(STORE_USER_KEY, user);
 		},
-
 		user: function user(login) {
 			return _user || _call('get', 'user' + (login ? '/' + login : '')).then(function (user) {
 				!login && github.setUser(user);
@@ -792,7 +784,6 @@ exports.default = (function github(OAuth, swal) {
 					return gist;
 				});
 			},
-
 			save: function save(id, desc, files) {
 				var gist = _gists[id];
 				var changed = undefined;
@@ -816,11 +807,9 @@ exports.default = (function github(OAuth, swal) {
 					return gist;
 				});
 			},
-
 			fork: function fork(id) {
 				return _call('post', 'gists/' + id + '/fork');
 			},
-
 			star: function star(id, state) {
 				return _call(state ? 'put' : 'del', 'gists/' + id + '/star').then(function () {
 					_stars[id] = state;
@@ -828,7 +817,6 @@ exports.default = (function github(OAuth, swal) {
 					return state;
 				});
 			},
-
 			checkStar: function checkStar(id) {
 				if (typeof _stars[id] === 'undefined') {
 					return _call('get', 'gists/' + id + '/star').then(function () {
@@ -880,9 +868,68 @@ exports.default = (function share(fetch) {
 
 	var SCREEN_WIDTH = screen.width;
 	var SCREEN_HEIGHT = screen.height;
-	var twttr = {};
-	var facebook = {};
 
+	var twttr = {
+		url: 'https://twitter.com/intent/tweet?text=',
+		length: 140,
+		width: 550,
+		height: 250
+	};
+
+	var _facebook = {
+		id: '900218293360254',
+		publishUrl: 'https://graph.facebook.com/me/photos',
+		width: 1200,
+		height: 630,
+
+		init: function init() {
+			return this._promiseInit || (this._promiseInit = new Promise(function (resolve) {
+				window.fbAsyncInit = function fbAsyncInit() {
+					var FB = window.FB;
+
+					FB.init({
+						appId: _facebook.id,
+						version: 'v2.5',
+						cookie: true,
+						oauth: true
+					});
+
+					_facebook.api = FB;
+					resolve(FB);
+				};
+
+				(function loadFacebook(d, s, id) {
+					var fjs = d.getElementsByTagName(s)[0];
+					var js = undefined;
+					if (d.getElementById(id)) {
+						return;
+					}
+					js = d.createElement(s);
+					js.id = id;
+					js.src = '//connect.facebook.net/en_US/sdk.js';
+					fjs.parentNode.insertBefore(js, fjs);
+				})(document, 'script', 'facebook-jssdk');
+			}));
+		},
+		login: function login() {
+			return this._promiseLogin || (this._promiseLogin = this.init().then(function (api) {
+				return new Promise(function (resolve, reject) {
+					api.login(function (response) {
+						if (response.authResponse) {
+							_facebook.token = response.authResponse.accessToken;
+							resolve();
+						} else {
+							reject(new Error('Access denied'));
+						}
+					}, {
+						scope: 'publish_actions'
+					});
+				});
+			}));
+		}
+	};
+
+	// todo: Вынести в утилиты
 	function generateChartsAsBlob(app, width, height) {
 		return new Promise(function (resolve) {
 			var el = document.createElement('div');
@@ -909,67 +956,6 @@ exports.default = (function share(fetch) {
 		});
 	}
 
-	twttr = {
-		url: 'https://twitter.com/intent/tweet?text=',
-		length: 140,
-		width: 550,
-		height: 250
-	};
-
-	facebook = {
-		id: '900218293360254',
-		publishUrl: 'https://graph.facebook.com/me/photos',
-		width: 1200,
-		height: 630,
-
-		init: function init() {
-			return this._promiseInit || (this._promiseInit = new Promise(function (resolve) {
-				window.fbAsyncInit = function fbAsyncInit() {
-					var FB = window.FB;
-
-					FB.init({
-						appId: facebook.id,
-						version: 'v2.5',
-						cookie: true,
-						oauth: true
-					});
-
-					facebook.api = FB;
-					resolve(FB);
-				};
-
-				(function loadFacebook(d, s, id) {
-					var fjs = d.getElementsByTagName(s)[0];
-					var js = undefined;
-					if (d.getElementById(id)) {
-						return;
-					}
-					js = d.createElement(s);
-					js.id = id;
-					js.src = '//connect.facebook.net/en_US/sdk.js';
-					fjs.parentNode.insertBefore(js, fjs);
-				})(document, 'script', 'facebook-jssdk');
-			}));
-		},
-
-		login: function login() {
-			return this._promiseLogin || (this._promiseLogin = this.init().then(function (api) {
-				return new Promise(function (resolve, reject) {
-					api.login(function (response) {
-						if (response.authResponse) {
-							facebook.token = response.authResponse.accessToken;
-							resolve();
-						} else {
-							reject(new Error('Access denied'));
-						}
-					}, {
-						scope: 'publish_actions'
-					});
-				});
-			}));
-		}
-	};
-
 	// Export
 	window.share = {
 		twitter: function twitter(desc, url, tags) {
@@ -981,17 +967,16 @@ exports.default = (function share(fetch) {
 
 			window.open(twttr.url + encodeURIComponent(message), '', params + extras);
 		},
-
 		facebook: function facebook(desc, url, tags, app) {
-			return Promise.all([facebook.login(), generateChartsAsBlob(app, facebook.width, facebook.height)]).then(function (results) {
+			return Promise.all([_facebook.login(), generateChartsAsBlob(app, _facebook.width, _facebook.height)]).then(function (results) {
 				var file = results[1];
 				var formData = new FormData();
 
-				formData.append('access_token', facebook.token);
+				formData.append('access_token', _facebook.token);
 				formData.append('source', file);
 				formData.append('message', desc + '\n' + url + '\n' + tags);
 
-				return fetch(facebook.publishUrl, {
+				return fetch(_facebook.publishUrl, {
 					method: 'post',
 					mode: 'cors',
 					body: formData
@@ -1006,9 +991,8 @@ exports.default = (function share(fetch) {
 				});
 			});
 		},
-
 		init: function init() {
-			facebook.init();
+			_facebook.init();
 		}
 	};
 })(window.fetch);

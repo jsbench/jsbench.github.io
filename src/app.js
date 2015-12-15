@@ -41,7 +41,7 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 		},
 
 		attrChanged: {
-			desc: function desc(desc) {
+			desc(desc) {
 				document.title = (desc ? desc + ' :: ' : '') + document.title.split('::').pop().trim();
 			}
 		},
@@ -52,11 +52,11 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 
 		snippets: [],
 
-		hasChanges: function hasChanges() {
+		hasChanges() {
 			return JSON.stringify(this._latestData) !== JSON.stringify(this.toJSON());
 		},
 
-		didMount: function didMount() {
+		didMount() {
 			// Предупреждалка
 			window.onbeforeunload = () => {
 				if (!this.attrs.gist.id && this.hasChanges() || this._latestUnsavedResults) {
@@ -97,7 +97,7 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 			});
 		},
 
-		routing: function routing() {
+		routing() {
 			const attrs = this.attrs;
 			let hash = location.hash.substr(1);
 
@@ -229,7 +229,7 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 				});
 		},
 
-		setStats: function setStats(values) {
+		setStats(values) {
 			const stats = {};
 
 			this._stats = values;
@@ -261,7 +261,7 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 			});
 		},
 
-		addStat: function addStat(stat) {
+		addStat(stat) {
 			if (stat) {
 				const gist = this.attrs.gist;
 				const data = {
@@ -280,7 +280,7 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 			}
 		},
 
-		toJSON: function toJSON() {
+		toJSON() {
 			const attrs = this.attrs;
 
 			return {
@@ -293,17 +293,24 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 			};
 		},
 
-		handleSuiteAdd: function handleSuiteAdd() {
+		handleScrollToEnd() {
+			// Скрываем кнопку скролла при достижении конца страницы
+			if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
+				this.handleScrollTo();
+			}
+		},
+
+		handleSuiteAdd() {
 			this.snippets.push(newSnippet());
 			this.render();
 		},
 
-		handleSuiteRemove: function handleSuiteRemove(evt) {
+		handleSuiteRemove(evt) {
 			this.snippets.splice(this.snippets.indexOf(evt.details), 1);
 			this.render();
 		},
 
-		handleSuiteRun: function handleSuiteRun() {
+		handleSuiteRun() {
 			const refs = this.refs;
 			const attrs = this.attrs;
 			const suite = new Benchmark.Suite;
@@ -317,7 +324,7 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 					fn: trimStr(snippet.code),
 					setup: trimStr(attrs.setup.code),
 					teardown: trimStr(attrs.teardown.code),
-					onCycle: function onCycle(evt) {
+					onCycle(evt) {
 						refs['stats-' + snippet.id].innerHTML = toStringBench(evt.target);
 					}
 				});
@@ -348,6 +355,8 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 
 						this.set('running', false);
 						this.refs.scrollTo.style.display = '';
+
+						this.$on(window, 'scroll', 'handleScrollToEnd');
 					}
 				});
 
@@ -357,7 +366,7 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 			this._suite = suite;
 		},
 
-		handleSuiteSave: function handleSuiteSave() {
+		handleSuiteSave() {
 			const attrs = this.attrs;
 			const gist = attrs.gist;
 			const desc = (attrs.desc || 'Untitled benchmark');
@@ -482,22 +491,23 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 					});
 		},
 
-		handleStar: function handleStar() {
+		handleStar() {
 			this.invert('starred');
 			github.gist.star(this.attrs.gist.id, this.attrs.starred);
 		},
 
-		handleConfigure: function handleConfigure(evt) {
+		handleConfigure(evt) {
 			evt.details.visible = !evt.details.visible;
 			this.render();
 		},
 
-		handleScrollTo: function handleScrollTo() {
+		handleScrollTo() {
 			this.refs.scrollTo.style.display = 'none';
 			this.refs.chart.scrollIntoView();
+			this.$off(window, 'scroll', 'handleScrollToEnd');
 		},
 
-		handleShare: function handleShare(evt) {
+		handleShare(evt) {
 			const service = evt.details;
 
 			Promise.resolve(
