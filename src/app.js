@@ -546,7 +546,7 @@
 	}
 
 	function getName(snippet) {
-		return (snippet.code !== undefined ? snippet.code : snippet).trim()
+		return String(snippet.code !== undefined ? snippet.code : snippet).trim()
 				.split('\n')[0].replace(/(^\/[*/]+|\**\/$)/g, '').trim();
 	}
 
