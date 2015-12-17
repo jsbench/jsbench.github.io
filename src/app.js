@@ -231,6 +231,7 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 
 		setStats(values) {
 			const stats = {};
+			let filledSnippets;
 
 			this._stats = values;
 
@@ -250,8 +251,13 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 				}
 			});
 
+			// Filter only snippets with actual code
+			filledSnippets = this.snippets.filter((sn) => {
+				return sn.code;
+			});
+
 			this.set('results', {
-				names: this.snippets.map((snippet, idx) => {
+				names: filledSnippets.map((snippet, idx) => {
 					return '#' + (idx + 1) + ': ' + getName(snippet);
 				}),
 
@@ -320,20 +326,22 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 				snippet.status = '';
 				index[snippet.id] = snippet;
 
-				suite.add(snippet.id, {
-					fn: trimStr(snippet.code),
-					setup: trimStr(attrs.setup.code),
-					teardown: trimStr(attrs.teardown.code),
-					onCycle(evt) {
-						refs['stats-' + snippet.id].innerHTML = toStringBench(evt.target);
-					}
-				});
+				// Add only relevant test snippets to suite
+				if (snippet.code) {
+					suite.add(snippet.id, {
+						fn: trimStr(snippet.code),
+						setup: trimStr(attrs.setup.code),
+						teardown: trimStr(attrs.teardown.code),
+						onCycle(evt) {
+							refs['stats-' + snippet.id].innerHTML = toStringBench(evt.target);
+						}
+					});
+				}
 			});
 
 			suite
 				.on('cycle', (evt) => {
 					const stat = evt.target;
-					// const el = refs['stats-' + stat.name];
 
 					!suite.aborted && (refs['stats-' + stat.name].innerHTML = toStringBench(stat));
 				})
