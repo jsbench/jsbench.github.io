@@ -308,11 +308,15 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 
 		handleSuiteAdd() {
 			this.snippets.push(newSnippet());
+			this.set('running', false);
 			this.render();
 		},
 
 		handleSuiteRemove(evt) {
 			this.snippets.splice(this.snippets.indexOf(evt.details), 1);
+			if (!this.snippets.length) {
+				this.set('running', true);
+			}
 			this.render();
 		},
 
