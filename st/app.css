@@ -152,7 +152,28 @@ a { color: #46b8da }
 	}
 
 	.app__snippets {
+		position: relative;
+	}
 
+	.app__overlay {
+		position: absolute;
+		background: #000;
+		left: 0;
+		right: 0;
+		top: 0;
+		bottom: 0;
+		opacity: 0;
+		visibility: hidden;
+		-webkit-transition: opacity .3s;
+		-moz-transition: opacity .3s;
+		transition: opacity .3s;
+		z-index: 23;
+		cursor: not-allowed;
+	}
+
+	.app__overlay.visible {
+		opacity: .1;
+		visibility: visible;
 	}
 
 	.app__scrollto {

@@ -367,12 +367,14 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 
 						this.set('running', false);
 						this.refs.scrollTo.style.display = '';
+						this.refs.snippetsOverlay.classList.remove('visible');
 
 						this.$on(window, 'scroll', 'handleScrollToEnd');
 					}
 				});
 
 			this.set('running', true);
+			this.refs.snippetsOverlay.classList.add('visible');
 
 			suite.run({'async': true});
 			this._suite = suite;
