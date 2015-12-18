@@ -373,6 +373,7 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 					}
 				});
 
+			// Tests are running
 			this.set('running', true);
 			this.refs.snippetsOverlay.classList.add('visible');
 

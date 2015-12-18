@@ -235,6 +235,7 @@ exports.default = (function app(feast, Benchmark, OAuth, github, share, swal) {
 		},
 		setStats: function setStats(values) {
 			var stats = {};
+			var filledSnippets = undefined;
 
 			this._stats = values;
 
@@ -254,8 +255,13 @@ exports.default = (function app(feast, Benchmark, OAuth, github, share, swal) {
 				}
 			});
 
+			// Filter only snippets with actual code
+			filledSnippets = this.snippets.filter(function (sn) {
+				return sn.code;
+			});
+
 			this.set('results', {
-				names: this.snippets.map(function (snippet, idx) {
+				names: filledSnippets.map(function (snippet, idx) {
 					return '#' + (idx + 1) + ': ' + getName(snippet);
 				}),
 
@@ -302,10 +308,14 @@ exports.default = (function app(feast, Benchmark, OAuth, github, share, swal) {
 		},
 		handleSuiteAdd: function handleSuiteAdd() {
 			this.snippets.push(newSnippet());
+			this.set('running', false);
 			this.render();
 		},
 		handleSuiteRemove: function handleSuiteRemove(evt) {
 			this.snippets.splice(this.snippets.indexOf(evt.details), 1);
+			if (!this.snippets.length) {
+				this.set('running', true);
+			}
 			this.render();
 		},
 		handleSuiteRun: function handleSuiteRun() {
@@ -320,19 +330,21 @@ exports.default = (function app(feast, Benchmark, OAuth, github, share, swal) {
 				snippet.status = '';
 				index[snippet.id] = snippet;
 
-				suite.add(snippet.id, {
-					fn: trimStr(snippet.code),
-					setup: trimStr(attrs.setup.code),
-					teardown: trimStr(attrs.teardown.code),
-					onCycle: function onCycle(evt) {
-						refs['stats-' + snippet.id].innerHTML = toStringBench(evt.target);
-					}
-				});
+				// Add only relevant test snippets to suite
+				if (snippet.code) {
+					suite.add(snippet.id, {
+						fn: trimStr(snippet.code),
+						setup: trimStr(attrs.setup.code),
+						teardown: trimStr(attrs.teardown.code),
+						onCycle: function onCycle(evt) {
+							refs['stats-' + snippet.id].innerHTML = toStringBench(evt.target);
+						}
+					});
+				}
 			});
 
 			suite.on('cycle', function (evt) {
 				var stat = evt.target;
-				// const el = refs['stats-' + stat.name];
 
 				!suite.aborted && (refs['stats-' + stat.name].innerHTML = toStringBench(stat));
 			}).on('complete', function (evt) {
@@ -353,12 +365,15 @@ exports.default = (function app(feast, Benchmark, OAuth, github, share, swal) {
 
 					_this3.set('running', false);
 					_this3.refs.scrollTo.style.display = '';
+					_this3.refs.snippetsOverlay.classList.remove('visible');
 
 					_this3.$on(window, 'scroll', 'handleScrollToEnd');
 				}
 			});
 
+			// Tests are running
 			this.set('running', true);
+			this.refs.snippetsOverlay.classList.add('visible');
 
 			suite.run({ 'async': true });
 			this._suite = suite;
@@ -654,7 +669,7 @@ exports.default = (function editor(feast, ace) {
 					editor.setOption('minLines', _this.attrs['min-lines'] || 4);
 
 					editor.on('change', function () {
-						_this.attrs.data.code = editor.getValue();
+						_this.attrs.data.code = editor.getValue().trim();
 					});
 
 					editor.setValue(_this.attrs.data.code || '', 1);
