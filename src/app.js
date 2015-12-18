@@ -299,6 +299,18 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 			};
 		},
 
+		testSnippetsEmpty() {
+			let filteredSnippets = this.snippets.filter((sn) => {
+			   return sn.code;
+			});
+
+			if (filteredSnippets === undefined || !filteredSnippets.length) {
+			    return true;
+			}
+
+			return false;
+		},
+
 		handleScrollToEnd() {
 			// Скрываем кнопку скролла при достижении конца страницы
 			if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
@@ -325,6 +337,10 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 			const attrs = this.attrs;
 			const suite = new Benchmark.Suite;
 			const index = {};
+
+			if (this.testSnippetsEmpty()) {
+				return;
+			}
 
 			this.snippets.forEach((snippet) => {
 				snippet.status = '';
