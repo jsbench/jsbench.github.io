@@ -257,7 +257,7 @@ exports.default = (function app(feast, Benchmark, OAuth, github, share, swal) {
 
 			// Filter only snippets with actual code
 			filledSnippets = this.snippets.filter(function (sn) {
-				return sn.code;
+				return trimStr(sn.code);
 			});
 
 			this.set('results', {
@@ -300,6 +300,17 @@ exports.default = (function app(feast, Benchmark, OAuth, github, share, swal) {
 				})
 			};
 		},
+		testSnippetsEmpty: function testSnippetsEmpty() {
+			var filteredSnippets = this.snippets.filter(function (sn) {
+				return trimStr(sn.code);
+			});
+
+			if (filteredSnippets === undefined || !filteredSnippets.length) {
+				return true;
+			}
+
+			return false;
+		},
 		handleScrollToEnd: function handleScrollToEnd() {
 			// Скрываем кнопку скролла при достижении конца страницы
 			if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
@@ -308,12 +319,15 @@ exports.default = (function app(feast, Benchmark, OAuth, github, share, swal) {
 		},
 		handleSuiteAdd: function handleSuiteAdd() {
 			this.snippets.push(newSnippet());
-			this.set('running', false);
+			// Enable `Run` button when we have at least 1 snippet
+			if (this.snippets.length === 1) {
+				this.set('running', false);
+			}
 			this.render();
 		},
 		handleSuiteRemove: function handleSuiteRemove(evt) {
 			this.snippets.splice(this.snippets.indexOf(evt.details), 1);
-			if (!this.snippets.length) {
+			if (!this.snippets.length && !this.get('running')) {
 				this.set('running', true);
 			}
 			this.render();
@@ -326,12 +340,16 @@ exports.default = (function app(feast, Benchmark, OAuth, github, share, swal) {
 			var suite = new Benchmark.Suite();
 			var index = {};
 
+			if (this.testSnippetsEmpty()) {
+				return;
+			}
+
 			this.snippets.forEach(function (snippet) {
 				snippet.status = '';
 				index[snippet.id] = snippet;
 
 				// Add only relevant test snippets to suite
-				if (snippet.code) {
+				if (trimStr(snippet.code)) {
 					suite.add(snippet.id, {
 						fn: trimStr(snippet.code),
 						setup: trimStr(attrs.setup.code),
@@ -365,7 +383,6 @@ exports.default = (function app(feast, Benchmark, OAuth, github, share, swal) {
 
 					_this3.set('running', false);
 					_this3.refs.scrollTo.style.display = '';
-					_this3.refs.snippetsOverlay.classList.remove('visible');
 
 					_this3.$on(window, 'scroll', 'handleScrollToEnd');
 				}
@@ -373,7 +390,6 @@ exports.default = (function app(feast, Benchmark, OAuth, github, share, swal) {
 
 			// Tests are running
 			this.set('running', true);
-			this.refs.snippetsOverlay.classList.add('visible');
 
 			suite.run({ 'async': true });
 			this._suite = suite;

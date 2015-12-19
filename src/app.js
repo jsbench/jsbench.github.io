@@ -253,12 +253,12 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 
 			// Filter only snippets with actual code
 			filledSnippets = this.snippets.filter((sn) => {
-				return sn.code;
+				return trimStr(sn.code);
 			});
 
 			this.set('results', {
 				names: filledSnippets.map((snippet, idx) => {
-					return '#' + (idx + 1) + ': ' + getName(snippet);
+					return `#${idx + 1}: ${getName(snippet)}`;
 				}),
 
 				series: Object.keys(stats).map((name) => {
@@ -300,12 +300,12 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 		},
 
 		testSnippetsEmpty() {
-			let filteredSnippets = this.snippets.filter((sn) => {
-			   return sn.code;
+			const filteredSnippets = this.snippets.filter((sn) => {
+				return trimStr(sn.code);
 			});
 
 			if (filteredSnippets === undefined || !filteredSnippets.length) {
-			    return true;
+				return true;
 			}
 
 			return false;
@@ -320,13 +320,16 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 
 		handleSuiteAdd() {
 			this.snippets.push(newSnippet());
-			this.set('running', false);
+			// Enable `Run` button when we have at least 1 snippet
+			if (this.snippets.length === 1) {
+				this.set('running', false);
+			}
 			this.render();
 		},
 
 		handleSuiteRemove(evt) {
 			this.snippets.splice(this.snippets.indexOf(evt.details), 1);
-			if (!this.snippets.length) {
+			if (!this.snippets.length && !this.get('running')) {
 				this.set('running', true);
 			}
 			this.render();
@@ -347,7 +350,7 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 				index[snippet.id] = snippet;
 
 				// Add only relevant test snippets to suite
-				if (snippet.code) {
+				if (trimStr(snippet.code)) {
 					suite.add(snippet.id, {
 						fn: trimStr(snippet.code),
 						setup: trimStr(attrs.setup.code),
@@ -383,7 +386,6 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 
 						this.set('running', false);
 						this.refs.scrollTo.style.display = '';
-						this.refs.snippetsOverlay.classList.remove('visible');
 
 						this.$on(window, 'scroll', 'handleScrollToEnd');
 					}
@@ -391,7 +393,6 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 
 			// Tests are running
 			this.set('running', true);
-			this.refs.snippetsOverlay.classList.add('visible');
 
 			suite.run({'async': true});
 			this._suite = suite;

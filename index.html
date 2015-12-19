@@ -63,7 +63,9 @@
 
 				</div>
 			</fn:for>
-			<div ref="snippetsOverlay" bem:elem="overlay"/>
+			<div ref="snippetsOverlay" bem:elem="overlay">
+				<bem:mod name="visible" test="attrs.running"/>
+			</div>
 		</div>
 
 		<div bem:elem="foot">

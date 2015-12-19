@@ -171,7 +171,7 @@ a { color: #46b8da }
 		cursor: not-allowed;
 	}
 
-	.app__overlay.visible {
+	.app__overlay_visible {
 		opacity: .1;
 		visibility: visible;
 	}
