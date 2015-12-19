@@ -65,7 +65,7 @@
 
 		"arrow-spacing": 2,
 		"arrow-parens": [2, "always"],
-		"arrow-body-style": [2, "always"],
+		"arrow-body-style": [2, "as-needed"],
 		"one-var": [2, "never"],
 		"constructor-super": 2,
 		"no-this-before-super": 2,

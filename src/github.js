@@ -42,9 +42,7 @@ export default (function github(OAuth, swal) {
 	}
 
 	function _call(type, method, data) {
-		return _getApi().then((api) => {
-			return api[type](method, {data: JSON.stringify(data)});
-		});
+		return _getApi().then((api) => api[type](method, {data: JSON.stringify(data)}));
 	}
 
 	function _store(key, value) {
@@ -78,15 +76,13 @@ export default (function github(OAuth, swal) {
 			findOne(id) {
 				let promise;
 				const url = 'gists/' + id;
-				const _fetch = () => {
-					return fetch(API_ENDPOINT + url).then((res) => {
-						if (res.status !== API_STATUS_OK) {
-							throw 'Error: ' + res.status;
-						}
+				const _fetch = () => fetch(API_ENDPOINT + url).then((res) => {
+					if (res.status !== API_STATUS_OK) {
+						throw 'Error: ' + res.status;
+					}
 
-						return res.json();
-					});
-				};
+					return res.json();
+				});
 
 				if (_gists[id]) { // Cache
 					promise = Promise.resolve(_gists[id]);
@@ -96,9 +92,7 @@ export default (function github(OAuth, swal) {
 						return _fetch();
 					});
 				} else {
-					promise = _fetch()['catch'](() => {
-						return _call('get', url);
-					});
+					promise = _fetch()['catch'](() => _call('get', url));
 				}
 
 				return promise.then((gist) => {
@@ -112,9 +106,7 @@ export default (function github(OAuth, swal) {
 				let changed;
 
 				if (gist && gist.description === desc && Object.keys(gist.files).length === Object.keys(files).length) {
-					changed = Object.keys(gist.files).filter((name) => {
-						return !files[name] || files[name].content !== gist.files[name].content;
-					});
+					changed = Object.keys(gist.files).filter((name) => !files[name] || files[name].content !== gist.files[name].content);
 
 					if (!changed.length) {
 						return Promise.resolve(gist);

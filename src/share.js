@@ -48,20 +48,19 @@ export default (function share(fetch) {
 		},
 
 		login() {
-			return this._promiseLogin || (this._promiseLogin = this.init().then((api) => {
-				return new Promise((resolve, reject) => {
-					api.login((response) => {
-						if (response.authResponse) {
-							facebook.token = response.authResponse.accessToken;
-							resolve();
-						} else {
-							reject(new Error('Access denied'));
-						}
-					}, {
-						scope: 'publish_actions'
-					});
+			return this._promiseLogin || (this._promiseLogin = this.init().then((api) => new Promise((resolve, reject) => {
+				api.login((response) => {
+					if (response.authResponse) {
+						facebook.token = response.authResponse.accessToken;
+						resolve();
+					} else {
+						reject(new Error('Access denied'));
+					}
+				}, {
+					scope: 'publish_actions'
 				});
-			}));
+			})
+			));
 		}
 	};
 

@@ -27,7 +27,7 @@
 <script id="app-template" type="text/html">
 	<div>
 		<fn:match name="btn-run">
-			<b:btn key="run" disabled="{attrs.running}" remit:click="suite:run" mod="success" value="Run"/>
+			<b:btn key="run" disabled="{attrs.running || !_this.snippets.length}" remit:click="suite:run" mod="success" value="Run"/>
 		</fn:match>
 
 		<div bem:elem="head">
