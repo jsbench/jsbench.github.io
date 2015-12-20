@@ -144,19 +144,13 @@
 
 <!-- Polyfills -->
 <script>
-	function include(src) { document.write('<script src="' + src + '"></' + 'script>'); }
-
-	[].forEach || include('//cdnjs.cloudflare.com/ajax/libs/es5-shim/4.1.14/es5-shim.min.js');
-	window.Promise || include('//cdnjs.cloudflare.com/ajax/libs/es6-promise/3.0.2/es6-promise.min.js');
-	window.fetch || include('//cdnjs.cloudflare.com/ajax/libs/fetch/0.10.0/fetch.min.js');
-	include('./vendor/canvas-to-blob.js');
+	(function (js) {
+		[].forEach || js('//cdnjs.cloudflare.com/ajax/libs/es5-shim/4.1.14/es5-shim.min.js');
+		window.Promise || js('//cdnjs.cloudflare.com/ajax/libs/es6-promise/3.0.2/es6-promise.min.js');
+		window.fetch || js('//cdnjs.cloudflare.com/ajax/libs/fetch/0.10.0/fetch.min.js');
+		js('./vendor/canvas-to-blob.js');
+	})(function (src) { document.write('<script src="' + src + '"></' + 'script>'); });
 </script>
-
-<!-- Google jsapi -->
-<script src="//www.google.com/jsapi"></script>
-
-<!-- Ace -->
-<script src="//cdnjs.cloudflare.com/ajax/libs/ace/1.2.2/ace.js"></script>
 
 <!-- Platform + Benchmark -->
 <script src="//cdnjs.cloudflare.com/ajax/libs/platform/1.3.0/platform.min.js"></script>
@@ -174,6 +168,15 @@
 
 <!-- Firebase.io -->
 <script src="//cdn.firebase.com/js/client/2.3.1/firebase.js"></script>
+
+<!-- RequireJS -->
+<script src="//cdnjs.cloudflare.com/ajax/libs/require.js/2.1.22/require.js"></script>
+
+<!-- Google jsapi -->
+<script src="//www.google.com/jsapi"></script>
+
+<!-- Ace -->
+<script src="//cdnjs.cloudflare.com/ajax/libs/ace/1.2.2/ace.js"></script>
 
 <!-- Application -->
 <script src="./bundles/js/jsbench.js"></script>

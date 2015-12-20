@@ -5,7 +5,7 @@ Object.defineProperty(exports, "__esModule", {
 	value: true
 });
 
-exports.default = (function app(feast, Benchmark, OAuth, github, share, swal) {
+exports.default = (function app(feast, Benchmark, OAuth, github, share, swal, require) {
 	'use strict';
 
 	var gid = 1;
@@ -15,6 +15,9 @@ exports.default = (function app(feast, Benchmark, OAuth, github, share, swal) {
 
 	var OAUTH_PUBLIC_KEY = 'PL76R8FlKhIm2_j4NELvcpRFErg';
 	var FIREBASE_ENDPOINT = 'https://jsbench.firebaseio.com/';
+
+	var R_REQUIREJS = /require\((["'])((?:https?:)?\/\/.*?|jquery)\1\)/g;
+	var R_REQUIREJS_CLEAN_PATH = /\.js(\?.*?)?$/;
 
 	var firebase = new Firebase(FIREBASE_ENDPOINT);
 
@@ -325,19 +328,26 @@ exports.default = (function app(feast, Benchmark, OAuth, github, share, swal) {
 			var attrs = this.attrs;
 			var suite = new Benchmark.Suite();
 			var index = {};
+			var depends = {};
 
 			if (this.testSnippetsEmpty()) {
 				return;
 			}
 
+			parseDeps(attrs.setup.code, depends);
+
 			this.snippets.forEach(function (snippet) {
+				var code = trimStr(snippet.code);
+
 				snippet.status = '';
 				index[snippet.id] = snippet;
 
 				// Add only relevant test snippets to suite
-				if (trimStr(snippet.code)) {
+				if (code) {
+					parseDeps(code, depends);
+
 					suite.add(snippet.id, {
-						fn: trimStr(snippet.code),
+						fn: code,
 						setup: trimStr(attrs.setup.code),
 						teardown: trimStr(attrs.teardown.code),
 						onCycle: function onCycle(evt) {
@@ -377,7 +387,22 @@ exports.default = (function app(feast, Benchmark, OAuth, github, share, swal) {
 			// Tests are running
 			this.set('running', true);
 
-			suite.run({ 'async': true });
+			var paths = {};
+
+			depends = Object.keys(depends).map(function (url) {
+				paths[url] = url.replace(R_REQUIREJS_CLEAN_PATH, '');
+				return url;
+			});
+
+			require.config({ paths: paths });
+
+			require(depends, function () {
+				suite.run({ 'async': true });
+			}, function (err) {
+				showError({ message: err.originalError.target.src });
+				_this3.set('running', false);
+			});
+
 			this._suite = suite;
 		},
 		handleSuiteSave: function handleSuiteSave() {
@@ -525,10 +550,18 @@ exports.default = (function app(feast, Benchmark, OAuth, github, share, swal) {
 		return gist.id;
 	}
 
+	function parseDeps(code, deps) {
+		var dep = undefined;
+
+		while (dep = R_REQUIREJS.exec(code)) {
+			deps[dep[2]] = true;
+		}
+	}
+
 	// Init
 	OAuth.initialize(OAUTH_PUBLIC_KEY);
 	window.app = new UIApp().renderTo(document.getElementById('canvas'));
-})(window.feast, window.Benchmark, window.OAuth, window.github, window.share, window.sweetAlert);
+})(window.feast, window.Benchmark, window.OAuth, window.github, window.share, window.sweetAlert, window.requirejs);
 
 },{}],2:[function(require,module,exports){
 'use strict';
@@ -587,6 +620,11 @@ exports.default = (function chart(feast, google) {
 			google.load('visualization', '1', {
 				packages: ['corechart', 'bar'],
 				callback: function callback() {
+					// uglyfix for https://github.com/google/google-visualization-issues/issues/2070
+					try {
+						window.requirejs([]);
+					} catch (err) {}
+
 					_this.visualization = true;
 					_this.redraw();
 				}

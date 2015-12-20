@@ -36,9 +36,10 @@ function buildScript(file) {
 		fullPaths: false
 	});
 
-	const transforms = [
-		{ 'name': babelify, 'options': {} }
-	];
+	const transforms = [{
+		name: babelify,
+		options: {}
+	}];
 
 	transforms.forEach((transform) => {
 		bundler.transform(transform.name, transform.options);
@@ -102,6 +103,12 @@ gulp.task('browser-sync', () => {
 			port: config.browserSync.UIPort
 		},
 		ghostMode: false
+	});
+});
+
+gulp.task('dev', () => {
+	gulp.watch('src/**', () => {
+		gulp.run('browserify');
 	});
 });
 
