@@ -169,9 +169,7 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 						firebase.child('stats').child(gist.id).child(getGistLastRevisionId(gist)).on('value', (snapshot) => {
 							const values = snapshot.val();
 
-							values && this.setStats(Object.keys(values).map((key) => {
-								return values[key];
-							}));
+							values && this.setStats(Object.keys(values).map((key) => values[key]));
 						});
 					})
 						['catch'](showError)
@@ -191,9 +189,7 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 						attrs.desc = restoredData.desc;
 						attrs.setup = restoredData.setup || {code: ''};
 						attrs.teardown = restoredData.teardown || {code: ''};
-						this.snippets = restoredData.snippets.map((code) => {
-							return newSnippet(code);
-						});
+						this.snippets = restoredData.snippets.map((code) => newSnippet(code));
 					} catch (err) {}
 
 					resolve();
@@ -231,6 +227,7 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 
 		setStats(values) {
 			const stats = {};
+			let filledSnippets;
 
 			this._stats = values;
 
@@ -250,14 +247,12 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 				}
 			});
 
-			this.set('results', {
-				names: this.snippets.map((snippet, idx) => {
-					return '#' + (idx + 1) + ': ' + getName(snippet);
-				}),
+			// Filter only snippets with actual code
+			filledSnippets = this.snippets.filter((sn) => trimStr(sn.code));
 
-				series: Object.keys(stats).map((name) => {
-					return stats[name];
-				})
+			this.set('results', {
+				names: filledSnippets.map((snippet, idx) => `#${idx + 1}: ${getName(snippet)}`),
+				series: Object.keys(stats).map((name) => stats[name])
 			});
 		},
 
@@ -287,10 +282,12 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 				desc: attrs.desc,
 				setup: {code: attrs.setup.code},
 				teardown: {code: attrs.teardown.code},
-				snippets: this.snippets.map((snippet) => {
-					return snippet.code;
-				})
+				snippets: this.snippets.map((snippet) => snippet.code)
 			};
+		},
+
+		testSnippetsEmpty() {
+			return this.snippets.every((snippet) => !trimStr(snippet.code));
 		},
 
 		handleScrollToEnd() {
@@ -316,24 +313,30 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 			const suite = new Benchmark.Suite;
 			const index = {};
 
+			if (this.testSnippetsEmpty()) {
+				return;
+			}
+
 			this.snippets.forEach((snippet) => {
 				snippet.status = '';
 				index[snippet.id] = snippet;
 
-				suite.add(snippet.id, {
-					fn: trimStr(snippet.code),
-					setup: trimStr(attrs.setup.code),
-					teardown: trimStr(attrs.teardown.code),
-					onCycle(evt) {
-						refs['stats-' + snippet.id].innerHTML = toStringBench(evt.target);
-					}
-				});
+				// Add only relevant test snippets to suite
+				if (trimStr(snippet.code)) {
+					suite.add(snippet.id, {
+						fn: trimStr(snippet.code),
+						setup: trimStr(attrs.setup.code),
+						teardown: trimStr(attrs.teardown.code),
+						onCycle(evt) {
+							refs['stats-' + snippet.id].innerHTML = toStringBench(evt.target);
+						}
+					});
+				}
 			});
 
 			suite
 				.on('cycle', (evt) => {
 					const stat = evt.target;
-					// const el = refs['stats-' + stat.name];
 
 					!suite.aborted && (refs['stats-' + stat.name].innerHTML = toStringBench(stat));
 				})
@@ -349,9 +352,7 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 							index[stat.name].status = 'slowest';
 						});
 
-						this.addStat(results.map((bench) => {
-							return bench.hz;
-						}));
+						this.addStat(results.map((bench) => bench.hz));
 
 						this.set('running', false);
 						this.refs.scrollTo.style.display = '';
@@ -360,6 +361,7 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 					}
 				});
 
+			// Tests are running
 			this.set('running', true);
 
 			suite.run({'async': true});
@@ -403,13 +405,12 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 				].join('\n')),
 
 				// Snippets
-				this.snippets.map((snippet) => {
-					return [
-						'	suite.add(' + JSON.stringify(getName(snippet)) + ', function () {',
-						'		' + trimStr(snippet.code).split('\n').join('\n\t\t'),
-						'	});'
-					].join('\n');
-				}).join('\n\n'),
+				this.snippets.map((snippet) => [
+					'	suite.add(' + JSON.stringify(getName(snippet)) + ', function () {',
+					'		' + trimStr(snippet.code).split('\n').join('\n\t\t'),
+					'	});'
+				].join('\n')
+				).join('\n\n'),
 				'',
 				'	suite.on("cycle", function (evt) {',
 				'		console.log(" - " + evt.target);',

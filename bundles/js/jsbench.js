@@ -235,6 +235,7 @@ exports.default = (function app(feast, Benchmark, OAuth, github, share, swal) {
 		},
 		setStats: function setStats(values) {
 			var stats = {};
+			var filledSnippets = undefined;
 
 			this._stats = values;
 
@@ -254,11 +255,15 @@ exports.default = (function app(feast, Benchmark, OAuth, github, share, swal) {
 				}
 			});
 
+			// Filter only snippets with actual code
+			filledSnippets = this.snippets.filter(function (sn) {
+				return trimStr(sn.code);
+			});
+
 			this.set('results', {
-				names: this.snippets.map(function (snippet, idx) {
+				names: filledSnippets.map(function (snippet, idx) {
 					return '#' + (idx + 1) + ': ' + getName(snippet);
 				}),
-
 				series: Object.keys(stats).map(function (name) {
 					return stats[name];
 				})
@@ -294,6 +299,11 @@ exports.default = (function app(feast, Benchmark, OAuth, github, share, swal) {
 				})
 			};
 		},
+		testSnippetsEmpty: function testSnippetsEmpty() {
+			return this.snippets.every(function (snippet) {
+				return !trimStr(snippet.code);
+			});
+		},
 		handleScrollToEnd: function handleScrollToEnd() {
 			// Скрываем кнопку скролла при достижении конца страницы
 			if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
@@ -316,23 +326,29 @@ exports.default = (function app(feast, Benchmark, OAuth, github, share, swal) {
 			var suite = new Benchmark.Suite();
 			var index = {};
 
+			if (this.testSnippetsEmpty()) {
+				return;
+			}
+
 			this.snippets.forEach(function (snippet) {
 				snippet.status = '';
 				index[snippet.id] = snippet;
 
-				suite.add(snippet.id, {
-					fn: trimStr(snippet.code),
-					setup: trimStr(attrs.setup.code),
-					teardown: trimStr(attrs.teardown.code),
-					onCycle: function onCycle(evt) {
-						refs['stats-' + snippet.id].innerHTML = toStringBench(evt.target);
-					}
-				});
+				// Add only relevant test snippets to suite
+				if (trimStr(snippet.code)) {
+					suite.add(snippet.id, {
+						fn: trimStr(snippet.code),
+						setup: trimStr(attrs.setup.code),
+						teardown: trimStr(attrs.teardown.code),
+						onCycle: function onCycle(evt) {
+							refs['stats-' + snippet.id].innerHTML = toStringBench(evt.target);
+						}
+					});
+				}
 			});
 
 			suite.on('cycle', function (evt) {
 				var stat = evt.target;
-				// const el = refs['stats-' + stat.name];
 
 				!suite.aborted && (refs['stats-' + stat.name].innerHTML = toStringBench(stat));
 			}).on('complete', function (evt) {
@@ -358,6 +374,7 @@ exports.default = (function app(feast, Benchmark, OAuth, github, share, swal) {
 				}
 			});
 
+			// Tests are running
 			this.set('running', true);
 
 			suite.run({ 'async': true });
@@ -654,7 +671,7 @@ exports.default = (function editor(feast, ace) {
 					editor.setOption('minLines', _this.attrs['min-lines'] || 4);
 
 					editor.on('change', function () {
-						_this.attrs.data.code = editor.getValue();
+						_this.attrs.data.code = editor.getValue().trim();
 					});
 
 					editor.setValue(_this.attrs.data.code || '', 1);

@@ -27,7 +27,7 @@
 <script id="app-template" type="text/html">
 	<div>
 		<fn:match name="btn-run">
-			<b:btn key="run" disabled="{attrs.running}" remit:click="suite:run" mod="success" value="Run"/>
+			<b:btn key="run" disabled="{attrs.running || !_this.snippets.length}" remit:click="suite:run" mod="success" value="Run"/>
 		</fn:match>
 
 		<div bem:elem="head">
@@ -63,6 +63,9 @@
 
 				</div>
 			</fn:for>
+			<div ref="snippetsOverlay" bem:elem="overlay">
+				<bem:mod name="visible" test="attrs.running"/>
+			</div>
 		</div>
 
 		<div bem:elem="foot">
@@ -78,7 +81,7 @@
 
 			<div ref="scrollTo" remit:click="scrollTo" bem:elem="scrollto" style="display: none"/>
 
-			<fn:if test="attrs.results">
+			<fn:if test="attrs.results && attrs.results.series.length">
 				<div ref="chart" bem:elem="chart">
 					<b:chart key="results" data="{attrs.results}"/>
 				</div>

@@ -21,7 +21,7 @@ export default (function editor(feast, ace) {
 				editor.setOption('minLines', this.attrs['min-lines'] || 4);
 
 				editor.on('change', () => {
-					this.attrs.data.code = editor.getValue();
+					this.attrs.data.code = editor.getValue().trim();
 				});
 
 				editor.setValue(this.attrs.data.code || '', 1);
