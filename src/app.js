@@ -70,7 +70,7 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal, requi
 			// Роутинг
 			window.onhashchange = () => {
 				new Promise((resolve, reject) => {
-					if (this.attrs.running) {
+					if (this.is('running')) {
 						swal({
 							title: 'Are you sure?',
 							type: 'warning',
@@ -363,16 +363,12 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal, requi
 						});
 
 						this.addStat(results.map((bench) => bench.hz));
-
-						this.set('running', false);
-						this.refs.scrollTo.style.display = '';
-
-						this.$on(window, 'scroll', 'handleScrollToEnd');
+						this.setRunningState(false, true);
 					}
 				});
 
 			// Tests are running
-			this.set('running', true);
+			this.setRunningState(true);
 
 			const paths = {};
 
@@ -386,11 +382,17 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal, requi
 			require(depends, () => {
 				suite.run({'async': true});
 			}, (err) => {
-				showError({message: err.originalError.target.src});
-				this.set('running', false);
+				showError({message: err.requireModules.join(', ')});
+				this.setRunningState(false);
 			});
 
 			this._suite = suite;
+		},
+
+		setRunningState(state, scrollTo) {
+			this.set('running', state);
+			this.refs.scrollTo.style.display = !state && scrollTo ? '' : 'none';
+			this[!state && scrollTo ? '$on' : '$off'](window, 'scroll', 'handleScrollToEnd');
 		},
 
 		handleSuiteSave() {

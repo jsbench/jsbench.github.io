@@ -1,4 +1,4 @@
-export default (function editor(feast, ace) {
+export default (function editor(feast) {
 	'use strict';
 
 	/**
@@ -10,29 +10,31 @@ export default (function editor(feast, ace) {
 		template: feast.parse('<div bem:mod="{attrs.mode}"/>'),
 
 		didMount() {
-			try {
-				const editor = this.editor = ace.edit(this.el);
+			requirejs(['ace/ace'], (ace) => {
+				try {
+					const editor = this.editor = ace.edit(this.el);
 
-				editor.$blockScrolling = Number.POSITIVE_INFINITY;
+					editor.$blockScrolling = Number.POSITIVE_INFINITY;
 
-				editor.setTheme('ace/theme/tomorrow');
-				editor.getSession().setMode('ace/mode/javascript');
-				editor.setOption('maxLines', this.attrs['max-lines'] || 30);
-				editor.setOption('minLines', this.attrs['min-lines'] || 4);
+					editor.setTheme('ace/theme/tomorrow');
+					editor.getSession().setMode('ace/mode/javascript');
+					editor.setOption('maxLines', this.attrs['max-lines'] || 30);
+					editor.setOption('minLines', this.attrs['min-lines'] || 4);
 
-				editor.on('change', () => {
-					this.attrs.data.code = editor.getValue().trim();
-				});
+					editor.on('change', () => {
+						this.attrs.data.code = editor.getValue().trim();
+					});
 
-				editor.setValue(this.attrs.data.code || '', 1);
-				editor.focus();
-			} catch (err) {
-				console.log('[Ace.error]', err);
-			}
+					editor.setValue(this.attrs.data.code || '', 1);
+					editor.focus();
+				} catch (err) {
+					console.warn('[Ace.error]', err);
+				}
+			});
 		},
 
 		didUnmount() {
 			this.editor && this.editor.destroy();
 		}
 	});
-})(window.feast, window.ace);
+})(window.feast);

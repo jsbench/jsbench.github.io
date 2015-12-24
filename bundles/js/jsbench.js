@@ -78,7 +78,7 @@ exports.default = (function app(feast, Benchmark, OAuth, github, share, swal, re
 			// Роутинг
 			window.onhashchange = function () {
 				new Promise(function (resolve, reject) {
-					if (_this.attrs.running) {
+					if (_this.is('running')) {
 						swal({
 							title: 'Are you sure?',
 							type: 'warning',
@@ -376,16 +376,12 @@ exports.default = (function app(feast, Benchmark, OAuth, github, share, swal, re
 					_this3.addStat(results.map(function (bench) {
 						return bench.hz;
 					}));
-
-					_this3.set('running', false);
-					_this3.refs.scrollTo.style.display = '';
-
-					_this3.$on(window, 'scroll', 'handleScrollToEnd');
+					_this3.setRunningState(false, true);
 				}
 			});
 
 			// Tests are running
-			this.set('running', true);
+			this.setRunningState(true);
 
 			var paths = {};
 
@@ -399,11 +395,16 @@ exports.default = (function app(feast, Benchmark, OAuth, github, share, swal, re
 			require(depends, function () {
 				suite.run({ 'async': true });
 			}, function (err) {
-				showError({ message: err.originalError.target.src });
-				_this3.set('running', false);
+				showError({ message: err.requireModules.join(', ') });
+				_this3.setRunningState(false);
 			});
 
 			this._suite = suite;
+		},
+		setRunningState: function setRunningState(state, scrollTo) {
+			this.set('running', state);
+			this.refs.scrollTo.style.display = !state && scrollTo ? '' : 'none';
+			this[!state && scrollTo ? '$on' : '$off'](window, 'scroll', 'handleScrollToEnd');
 		},
 		handleSuiteSave: function handleSuiteSave() {
 			var _this4 = this;
@@ -682,7 +683,7 @@ Object.defineProperty(exports, "__esModule", {
 	value: true
 });
 
-exports.default = (function editor(feast, ace) {
+exports.default = (function editor(feast) {
 	'use strict'
 
 	/**
@@ -697,33 +698,35 @@ exports.default = (function editor(feast, ace) {
 		didMount: function didMount() {
 			var _this = this;
 
-			try {
-				(function () {
-					var editor = _this.editor = ace.edit(_this.el);
+			requirejs(['ace/ace'], function (ace) {
+				try {
+					(function () {
+						var editor = _this.editor = ace.edit(_this.el);
 
-					editor.$blockScrolling = Number.POSITIVE_INFINITY;
+						editor.$blockScrolling = Number.POSITIVE_INFINITY;
 
-					editor.setTheme('ace/theme/tomorrow');
-					editor.getSession().setMode('ace/mode/javascript');
-					editor.setOption('maxLines', _this.attrs['max-lines'] || 30);
-					editor.setOption('minLines', _this.attrs['min-lines'] || 4);
+						editor.setTheme('ace/theme/tomorrow');
+						editor.getSession().setMode('ace/mode/javascript');
+						editor.setOption('maxLines', _this.attrs['max-lines'] || 30);
+						editor.setOption('minLines', _this.attrs['min-lines'] || 4);
 
-					editor.on('change', function () {
-						_this.attrs.data.code = editor.getValue().trim();
-					});
+						editor.on('change', function () {
+							_this.attrs.data.code = editor.getValue().trim();
+						});
 
-					editor.setValue(_this.attrs.data.code || '', 1);
-					editor.focus();
-				})();
-			} catch (err) {
-				console.log('[Ace.error]', err);
-			}
+						editor.setValue(_this.attrs.data.code || '', 1);
+						editor.focus();
+					})();
+				} catch (err) {
+					console.warn('[Ace.error]', err);
+				}
+			});
 		},
 		didUnmount: function didUnmount() {
 			this.editor && this.editor.destroy();
 		}
 	});
-})(window.feast, window.ace);
+})(window.feast);
 
 },{}],5:[function(require,module,exports){
 'use strict';
