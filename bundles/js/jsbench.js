@@ -5,7 +5,7 @@ Object.defineProperty(exports, "__esModule", {
 	value: true
 });
 
-exports.default = (function app(feast, Benchmark, OAuth, github, share, swal) {
+exports.default = (function app(feast, Benchmark, OAuth, github, share, swal, require) {
 	'use strict';
 
 	var gid = 1;
@@ -15,6 +15,9 @@ exports.default = (function app(feast, Benchmark, OAuth, github, share, swal) {
 
 	var OAUTH_PUBLIC_KEY = 'PL76R8FlKhIm2_j4NELvcpRFErg';
 	var FIREBASE_ENDPOINT = 'https://jsbench.firebaseio.com/';
+
+	var R_REQUIREJS = /require\((["'])((?:https?:)?\/\/.*?|jquery)\1\)/g;
+	var R_REQUIREJS_CLEAN_PATH = /\.js(\?.*?)?$/;
 
 	var firebase = new Firebase(FIREBASE_ENDPOINT);
 
@@ -75,7 +78,7 @@ exports.default = (function app(feast, Benchmark, OAuth, github, share, swal) {
 			// Роутинг
 			window.onhashchange = function () {
 				new Promise(function (resolve, reject) {
-					if (_this.attrs.running) {
+					if (_this.is('running')) {
 						swal({
 							title: 'Are you sure?',
 							type: 'warning',
@@ -325,19 +328,26 @@ exports.default = (function app(feast, Benchmark, OAuth, github, share, swal) {
 			var attrs = this.attrs;
 			var suite = new Benchmark.Suite();
 			var index = {};
+			var depends = {};
 
 			if (this.testSnippetsEmpty()) {
 				return;
 			}
 
+			parseDeps(attrs.setup.code, depends);
+
 			this.snippets.forEach(function (snippet) {
+				var code = trimStr(snippet.code);
+
 				snippet.status = '';
 				index[snippet.id] = snippet;
 
 				// Add only relevant test snippets to suite
-				if (trimStr(snippet.code)) {
+				if (code) {
+					parseDeps(code, depends);
+
 					suite.add(snippet.id, {
-						fn: trimStr(snippet.code),
+						fn: code,
 						setup: trimStr(attrs.setup.code),
 						teardown: trimStr(attrs.teardown.code),
 						onCycle: function onCycle(evt) {
@@ -366,19 +376,35 @@ exports.default = (function app(feast, Benchmark, OAuth, github, share, swal) {
 					_this3.addStat(results.map(function (bench) {
 						return bench.hz;
 					}));
-
-					_this3.set('running', false);
-					_this3.refs.scrollTo.style.display = '';
-
-					_this3.$on(window, 'scroll', 'handleScrollToEnd');
+					_this3.setRunningState(false, true);
 				}
 			});
 
 			// Tests are running
-			this.set('running', true);
+			this.setRunningState(true);
 
-			suite.run({ 'async': true });
+			var paths = {};
+
+			depends = Object.keys(depends).map(function (url) {
+				paths[url] = url.replace(R_REQUIREJS_CLEAN_PATH, '');
+				return url;
+			});
+
+			require.config({ paths: paths });
+
+			require(depends, function () {
+				suite.run({ 'async': true });
+			}, function (err) {
+				showError({ message: err.requireModules.join(', ') });
+				_this3.setRunningState(false);
+			});
+
 			this._suite = suite;
+		},
+		setRunningState: function setRunningState(state, scrollTo) {
+			this.set('running', state);
+			this.refs.scrollTo.style.display = !state && scrollTo ? '' : 'none';
+			this[!state && scrollTo ? '$on' : '$off'](window, 'scroll', 'handleScrollToEnd');
 		},
 		handleSuiteSave: function handleSuiteSave() {
 			var _this4 = this;
@@ -525,10 +551,18 @@ exports.default = (function app(feast, Benchmark, OAuth, github, share, swal) {
 		return gist.id;
 	}
 
+	function parseDeps(code, deps) {
+		var dep = undefined;
+
+		while (dep = R_REQUIREJS.exec(code)) {
+			deps[dep[2]] = true;
+		}
+	}
+
 	// Init
 	OAuth.initialize(OAUTH_PUBLIC_KEY);
 	window.app = new UIApp().renderTo(document.getElementById('canvas'));
-})(window.feast, window.Benchmark, window.OAuth, window.github, window.share, window.sweetAlert);
+})(window.feast, window.Benchmark, window.OAuth, window.github, window.share, window.sweetAlert, window.requirejs);
 
 },{}],2:[function(require,module,exports){
 'use strict';
@@ -587,6 +621,11 @@ exports.default = (function chart(feast, google) {
 			google.load('visualization', '1', {
 				packages: ['corechart', 'bar'],
 				callback: function callback() {
+					// uglyfix for https://github.com/google/google-visualization-issues/issues/2070
+					try {
+						window.requirejs([]);
+					} catch (err) {}
+
 					_this.visualization = true;
 					_this.redraw();
 				}
@@ -644,7 +683,7 @@ Object.defineProperty(exports, "__esModule", {
 	value: true
 });
 
-exports.default = (function editor(feast, ace) {
+exports.default = (function editor(feast) {
 	'use strict'
 
 	/**
@@ -659,33 +698,35 @@ exports.default = (function editor(feast, ace) {
 		didMount: function didMount() {
 			var _this = this;
 
-			try {
-				(function () {
-					var editor = _this.editor = ace.edit(_this.el);
+			requirejs(['ace/ace'], function (ace) {
+				try {
+					(function () {
+						var editor = _this.editor = ace.edit(_this.el);
 
-					editor.$blockScrolling = Number.POSITIVE_INFINITY;
+						editor.$blockScrolling = Number.POSITIVE_INFINITY;
 
-					editor.setTheme('ace/theme/tomorrow');
-					editor.getSession().setMode('ace/mode/javascript');
-					editor.setOption('maxLines', _this.attrs['max-lines'] || 30);
-					editor.setOption('minLines', _this.attrs['min-lines'] || 4);
+						editor.setTheme('ace/theme/tomorrow');
+						editor.getSession().setMode('ace/mode/javascript');
+						editor.setOption('maxLines', _this.attrs['max-lines'] || 30);
+						editor.setOption('minLines', _this.attrs['min-lines'] || 4);
 
-					editor.on('change', function () {
-						_this.attrs.data.code = editor.getValue().trim();
-					});
+						editor.on('change', function () {
+							_this.attrs.data.code = editor.getValue().trim();
+						});
 
-					editor.setValue(_this.attrs.data.code || '', 1);
-					editor.focus();
-				})();
-			} catch (err) {
-				console.log('[Ace.error]', err);
-			}
+						editor.setValue(_this.attrs.data.code || '', 1);
+						editor.focus();
+					})();
+				} catch (err) {
+					console.warn('[Ace.error]', err);
+				}
+			});
 		},
 		didUnmount: function didUnmount() {
 			this.editor && this.editor.destroy();
 		}
 	});
-})(window.feast, window.ace);
+})(window.feast);
 
 },{}],5:[function(require,module,exports){
 'use strict';

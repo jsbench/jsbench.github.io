@@ -1,4 +1,4 @@
-export default (function app(feast, Benchmark, OAuth, github, share, swal) {
+export default (function app(feast, Benchmark, OAuth, github, share, swal, require) {
 	'use strict';
 
 	let gid = 1;
@@ -8,6 +8,9 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 
 	const OAUTH_PUBLIC_KEY = 'PL76R8FlKhIm2_j4NELvcpRFErg';
 	const FIREBASE_ENDPOINT = 'https://jsbench.firebaseio.com/';
+
+	const R_REQUIREJS = /require\((["'])((?:https?:)?\/\/.*?|jquery)\1\)/g;
+	const R_REQUIREJS_CLEAN_PATH = /\.js(\?.*?)?$/;
 
 	const firebase = new Firebase(FIREBASE_ENDPOINT);
 
@@ -67,7 +70,7 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 			// Роутинг
 			window.onhashchange = () => {
 				new Promise((resolve, reject) => {
-					if (this.attrs.running) {
+					if (this.is('running')) {
 						swal({
 							title: 'Are you sure?',
 							type: 'warning',
@@ -312,19 +315,26 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 			const attrs = this.attrs;
 			const suite = new Benchmark.Suite;
 			const index = {};
+			let depends = {};
 
 			if (this.testSnippetsEmpty()) {
 				return;
 			}
 
+			parseDeps(attrs.setup.code, depends);
+
 			this.snippets.forEach((snippet) => {
+				const code = trimStr(snippet.code);
+
 				snippet.status = '';
 				index[snippet.id] = snippet;
 
 				// Add only relevant test snippets to suite
-				if (trimStr(snippet.code)) {
+				if (code) {
+					parseDeps(code, depends);
+
 					suite.add(snippet.id, {
-						fn: trimStr(snippet.code),
+						fn: code,
 						setup: trimStr(attrs.setup.code),
 						teardown: trimStr(attrs.teardown.code),
 						onCycle(evt) {
@@ -353,19 +363,36 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 						});
 
 						this.addStat(results.map((bench) => bench.hz));
-
-						this.set('running', false);
-						this.refs.scrollTo.style.display = '';
-
-						this.$on(window, 'scroll', 'handleScrollToEnd');
+						this.setRunningState(false, true);
 					}
 				});
 
 			// Tests are running
-			this.set('running', true);
+			this.setRunningState(true);
 
-			suite.run({'async': true});
+			const paths = {};
+
+			depends = Object.keys(depends).map((url) => {
+				paths[url] = url.replace(R_REQUIREJS_CLEAN_PATH, '');
+				return url;
+			});
+
+			require.config({paths: paths});
+
+			require(depends, () => {
+				suite.run({'async': true});
+			}, (err) => {
+				showError({message: err.requireModules.join(', ')});
+				this.setRunningState(false);
+			});
+
 			this._suite = suite;
+		},
+
+		setRunningState(state, scrollTo) {
+			this.set('running', state);
+			this.refs.scrollTo.style.display = !state && scrollTo ? '' : 'none';
+			this[!state && scrollTo ? '$on' : '$off'](window, 'scroll', 'handleScrollToEnd');
 		},
 
 		handleSuiteSave() {
@@ -590,7 +617,15 @@ export default (function app(feast, Benchmark, OAuth, github, share, swal) {
 		return gist.id;
 	}
 
+	function parseDeps(code, deps) {
+		let dep;
+
+		while ((dep = R_REQUIREJS.exec(code))) {
+			deps[dep[2]] = true;
+		}
+	}
+
 	// Init
 	OAuth.initialize(OAUTH_PUBLIC_KEY);
 	window.app = new UIApp().renderTo(document.getElementById('canvas'));
-})(window.feast, window.Benchmark, window.OAuth, window.github, window.share, window.sweetAlert);
+})(window.feast, window.Benchmark, window.OAuth, window.github, window.share, window.sweetAlert, window.requirejs);

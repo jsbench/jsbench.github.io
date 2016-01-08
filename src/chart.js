@@ -19,6 +19,11 @@ export default (function chart(feast, google) {
 			google.load('visualization', '1', {
 				packages: ['corechart', 'bar'],
 				callback: () => {
+					// uglyfix for https://github.com/google/google-visualization-issues/issues/2070
+					try {
+						window.requirejs([]);
+					} catch (err) {}
+
 					this.visualization = true;
 					this.redraw();
 				}
