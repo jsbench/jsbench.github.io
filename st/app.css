@@ -308,7 +308,19 @@ a { color: #46b8da }
 .chart {
 	height: 60vh;
 	min-height: 300px;
+	position: relative;
 }
+	.chart__area {
+		width: 100%;
+		height: 100%;
+	}
+
+	.chart__magnifier {
+		right: 10%;
+		bottom: 5%;
+		position: absolute;
+	}
+
 	.chart_fit {
 		width: 100%;
 		height: 100%;
@@ -411,3 +423,39 @@ a { color: #46b8da }
 	50% { transform: translateY(0px); }
 	100% { transform: translateY(-20px); }
 }
+
+/* "o" */
+.icon-magnifier {
+    display: inline-block;
+    vertical-align: middle;
+    cursor: pointer;
+    width: 26px;
+    height: 26px;
+    border: 4px solid #ccc;
+    border-radius: 100%;
+    opacity: .7;
+}
+	/* "\" */
+	.icon-magnifier:after {
+		display: block;
+		content: '';
+		position: absolute;
+		width: 4px;
+		height: 14px;
+		background-color: #ccc;
+		bottom: -8px;
+		left: 34px;
+		transform: rotate(-45deg);
+		border-radius: 5px;
+	}
+
+	/* "-" */
+	.icon-magnifier.auto:before {
+		display: block;
+		content: '';
+		height: 4px;
+		background: #ccc;
+		position: relative;
+		top: 11px;
+		margin: 0 3px;
+	}

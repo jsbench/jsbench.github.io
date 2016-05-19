@@ -7,7 +7,16 @@
 	 */
 	var UIChart = feast.Block.extend(/** @lends UIChart# */{
 		name: 'chart',
-		template: feast.parse('<div/>'),
+		template: feast.parse(
+			'<div>' +
+			'	<div ref="area" bem:elem="area"/>' +
+			'	<div bem:elem="magnifier">' +
+			'		<div on-click="_this.toggleZoom();" class="icon-magnifier">' +
+			'			<fn:add-class name="{attrs.minValue}"/>' +
+			'		</div>' +
+			'	</div>' +
+			'</div>'
+		),
 
 		attrChanged: {
 			'data': function () {
@@ -30,7 +39,7 @@
 
 			if (google.visualization && data) {
 				if (!this.chart) {
-					this.chart = new google.visualization.BarChart(this.el);
+					this.chart = new google.visualization.BarChart(this.refs.area);
 
 					google.visualization.events.addListener(this.chart, 'ready', function () {
 						this.broadcast('ready');
@@ -57,10 +66,18 @@
 						legend: {
 							position: 'right',
 							alignment: 'center'
+						},
+						hAxis: {
+							minValue: this.attrs.minValue || 0
 						}
 					}
 				);
 			}
+		},
+
+		toggleZoom: function () {
+			this.set('minValue', this.attrs.minValue ? 0 : 'auto');
+			this.redraw();
 		},
 
 		toDataURI: function () {
